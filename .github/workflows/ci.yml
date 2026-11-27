@@ -99,4 +99,5 @@ jobs:
 
       - name: Validate Docker Compose Configuration
         run: |
-          docker compose config --quiet
+          cp .env.example .env
+          POSTGRES_PASSWORD=ci-only-database-password docker compose config --quiet

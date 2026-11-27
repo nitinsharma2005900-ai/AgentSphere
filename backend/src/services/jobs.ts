@@ -11,7 +11,7 @@ function getQueue(){
  return queue||(queue=new Queue('agentsphere-executions',{connection:connection as any}));
 }
 export async function enqueue(record:ExecutionRecord){
- await getQueue().add('execute',{organizationId:record.organizationId,executionId:record.id},{jobId:record.id,attempts:3,backoff:{type:'exponential',delay:1500},removeOnComplete:100,removeOnFail:100});
+ await getQueue().add('execute',{organizationId:record.organizationId,executionId:record.id},{jobId:`${record.id}-${record.stepsTimeline.length}`,attempts:3,backoff:{type:'exponential',delay:1500},removeOnComplete:100,removeOnFail:100});
 }
 export async function queueHealth(){if(!config.redisUrl)return {status:'not_configured',mode:'inline'};try{await getQueue().waitUntilReady();return {status:await connection!.ping()==='PONG'?'healthy':'unhealthy',counts:await getQueue().getJobCounts('waiting','active','failed')};}catch{return {status:'unhealthy'};}}
 export async function startWorker(){
