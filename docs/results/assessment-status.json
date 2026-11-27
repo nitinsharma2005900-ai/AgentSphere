@@ -12,7 +12,7 @@
       "id": "02",
       "assessment": "AI platform backend",
       "status": "Verified",
-      "evidence": "57 documented core API operations; 29 backend tests and 13 live API checks."
+      "evidence": "57 documented core API operations; 30 backend tests and 13 live API checks."
     },
     {
       "id": "03",
@@ -72,7 +72,7 @@
       "id": "12",
       "assessment": "Safety and reliability tests",
       "status": "Verified tested cases",
-      "evidence": "21 Python tests and 29 backend tests; injection, isolation, role escalation, replay, unsafe tools, loop and quota regression coverage."
+      "evidence": "21 Python tests and 30 backend tests; injection, isolation, role escalation, replay, unsafe tools, loop and quota regression coverage."
     },
     {
       "id": "13",

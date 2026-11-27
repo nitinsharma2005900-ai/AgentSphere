@@ -11,7 +11,7 @@ A multi-tenant agent, knowledge retrieval, and approval-workflow platform. Exist
 
 ## Verified results
 
-29 backend tests and 21 Python tests pass. The deployed API journey passes 13/13 checks, including document ingestion, actual source retrieval, tenant isolation, re-indexing, real Gemini RAG, queued approval continuation, and authenticated CSV download. A Playwright browser journey passes login, main navigation, agent dialogs, tool testing, export and mobile navigation. Both production dependency audits report zero vulnerabilities. PostgreSQL backup/restore was verified for all 15 application tables in an isolated schema, then rolled back.
+30 backend tests and 21 Python tests pass. The deployed API journey passes 13/13 checks, including document ingestion, actual source retrieval, tenant isolation, re-indexing, real Gemini RAG, queued approval continuation, and authenticated CSV download. A Playwright browser journey passes login, main navigation, agent dialogs, tool testing, export and mobile navigation. Both production dependency audits report zero vulnerabilities. PostgreSQL backup/restore was verified for all 15 application tables in an isolated schema, then rolled back.
 
 Gemini 3.1 Flash Lite was verified with real API usage. The retired original model returned 404. A separate live model-selected calculator call returned 323, but its follow-up inference timed out; that execution correctly reports failure. This limitation is retained in the evidence.
 

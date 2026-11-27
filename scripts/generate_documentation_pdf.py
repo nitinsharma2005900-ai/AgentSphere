@@ -1,4 +1,4 @@
-﻿from pathlib import Path
+from pathlib import Path
 from xml.sax.saxutils import escape
 import json
 from reportlab.platypus import SimpleDocTemplate,Paragraph,Spacer,Table,TableStyle,PageBreak,Image
@@ -13,7 +13,7 @@ def build_pdf():
     for label,url in [('GitHub','https://github.com/nitinsharma2005900-ai/AgentSphere'),('Live frontend','https://agentsphere-zeta.vercel.app'),('Backend','https://agentsphere-api-nitinsharma.onrender.com')]:
         story.append(Paragraph(f'{label}: <link href="{url}" color="#7C3AED">{url}</link>',styles['BodyText']))
     story.extend([Spacer(1,14),Paragraph('Verified evidence',styles['Heading1'])])
-    rows=[['Check','Result'],['Backend tests','29 passed'],['Python tests','21 passed'],['Deployed API journey','13 / 13 checks passed'],['Browser journey','Passed: login, navigation, dialogs, tool, CSV, mobile'],['Production dependency audits','0 vulnerabilities: frontend and backend'],['PostgreSQL backup / restore','15 tables restored in isolated schema; rolled back'],['Real AI','Gemini inference and RAG verified; no mock used']]
+    rows=[['Check','Result'],['Backend tests','30 passed'],['Python tests','21 passed'],['Deployed API journey','13 / 13 checks passed'],['Browser journey','Passed: login, navigation, dialogs, tool, CSV, mobile'],['Production dependency audits','0 vulnerabilities: frontend and backend'],['PostgreSQL backup / restore','15 tables restored in isolated schema; rolled back'],['Real AI','Gemini inference and RAG verified; no mock used']]
     table=Table(rows,colWidths=[170,340]);table.setStyle(TableStyle([('BACKGROUND',(0,0),(-1,0),VIOLET),('TEXTCOLOR',(0,0),(-1,0),colors.white),('GRID',(0,0),(-1,-1),.3,colors.HexColor('#DDD6FE')),('FONTSIZE',(0,0),(-1,-1),9),('BOTTOMPADDING',(0,0),(-1,-1),8)]));story.extend([table,Spacer(1,12)])
     story.append(Paragraph('Architecture',styles['Heading1']))
     drawing=Drawing(510,120)

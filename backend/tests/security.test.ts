@@ -5,6 +5,9 @@ import {ToolExecutor} from '../src/services/toolExecutor';
 import {ExecutionEngine} from '../src/services/executionEngine';
 import {AiGatewayClient} from '../src/services/aiGatewayClient';
 import {encrypt,decrypt} from '../src/services/security';
+import dns from 'dns/promises';
+import https from 'https';
+import {EventEmitter} from 'events';
 let token:string,refreshToken:string;
 beforeAll(async()=>{await db.ready;const login=await request(app).post('/api/v1/auth/login').send({email:'owner@agentsphere.ai',password:'Password123!'});token=login.body.token;refreshToken=login.body.refreshToken;});
 afterAll(async()=>db.close());
@@ -38,4 +41,15 @@ test('daily execution limit blocks new work',async()=>{
  const org=(await db.getOrganization('org-acme-1'))!;
  await db.updateOrganization(org.id,{usedExecutionsToday:org.dailyExecutionLimit,usageDay:new Date().toISOString().slice(0,10)});
  try{await expect(ExecutionEngine.runAgent(org.id,'agent-concierge-1','Explain quotas')).rejects.toThrow('Daily execution quota');}finally{await db.updateOrganization(org.id,org);}
+});
+test('pinned public DNS uses the Node address-list callback contract',async()=>{
+ jest.spyOn(dns,'lookup').mockResolvedValue([{address:'8.8.8.8',family:4}] as any);
+ (jest.spyOn(https,'get') as any).mockImplementation((_url:any,options:any,callback:any)=>{
+  options.lookup('api.open-meteo.com',{all:true},(_error:any,answers:any)=>expect(answers).toEqual([{address:'8.8.8.8',family:4}]));
+  const response:any=new EventEmitter();response.statusCode=200;callback(response);
+  queueMicrotask(()=>{response.emit('data','{"verified":true}');response.emit('end');});
+  return new EventEmitter();
+ });
+ expect(await ToolExecutor.external('https://api.open-meteo.com/v1/forecast',1000)).toEqual({verified:true});
+ expect(dns.lookup).toHaveBeenCalledWith('api.open-meteo.com',{all:true,family:4});
 });

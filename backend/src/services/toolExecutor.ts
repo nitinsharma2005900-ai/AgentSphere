@@ -42,12 +42,12 @@ export class ToolExecutor {
   let url:URL;try{url=new URL(endpoint);}catch{throw new AppError(400,'Invalid tool endpoint');}
   const hosts=(process.env.TOOL_ALLOWED_HOSTS||'api.open-meteo.com').split(',').map(s=>s.trim());
   if(url.protocol!=='https:'||url.username||url.password||(url.port&&url.port!=='443')||net.isIP(url.hostname)||!hosts.includes(url.hostname))throw new AppError(403,'Tool endpoint is outside the server HTTPS host allowlist');
-  const answers=await dns.lookup(url.hostname,{all:true});
+  const answers=await dns.lookup(url.hostname,{all:true,family:4});
   const privateIp=(ip:string)=>/^(?:0\.|10\.|127\.|169\.254\.|172\.(?:1[6-9]|2\d|3[01])\.|192\.168\.|224\.|::|fc|fd|fe80|ff)/i.test(ip)||ip.includes(':');
   if(!answers.length||answers.some(a=>privateIp(a.address)))throw new AppError(403,'Private and local tool destinations are prohibited');
   const selected=answers[0];
   return new Promise((resolve,reject)=>{
-   const request=https.get(url,{headers:{Accept:'application/json',...(credential?{Authorization:`Bearer ${credential}`}:{})},lookup:((_host:any,_opts:any,cb:any)=>cb(null,selected.address,selected.family)) as any,timeout:Math.min(timeoutMs,15000)},response=>{
+   const request=https.get(url,{headers:{Accept:'application/json',...(credential?{Authorization:`Bearer ${credential}`}:{})},lookup:((_host:any,options:any,cb:any)=>options.all?cb(null,[{address:selected.address,family:selected.family}]):cb(null,selected.address,selected.family)) as any,timeout:Math.min(timeoutMs,15000)},response=>{
     if(response.statusCode!==200){response.resume();return reject(new AppError(502,'External tool request failed; redirects are prohibited'));}
     let body='';response.on('data',chunk=>{body+=chunk;if(Buffer.byteLength(body)>1024*1024){request.destroy();reject(new AppError(502,'External response exceeds 1 MB'));}});
     response.on('end',()=>{try{resolve(JSON.parse(body));}catch{reject(new AppError(502,'External tool returned invalid JSON'));}});

@@ -39,7 +39,7 @@
     {
       "test": "real Gemini RAG execution",
       "passed": true,
-      "detail": "{'text': 'The invoice approval threshold is 5000 USD, and the verification reference is ORBIT-742.\\n\\nSource: verification-policy.txt (chunk 8fb48f15-b7c4-455f-b0ab-00d2cb4c2418_chunk_0)', 'provider': 'gemini', 'citations': [{'content': 'AgentSphere verification policy: invoice approval threshold is"
+      "detail": "{'text': 'The invoice approval threshold is 5,000 USD, and the verification reference is ORBIT-742 (verification-policy.txt, chunk 30a57a39-dbc0-428e-8c6e-a3e335ba4dcd_chunk_0).', 'provider': 'gemini', 'citations': [{'content': 'AgentSphere verification policy: invoice approval threshold is 5000 USD"
     },
     {
       "test": "workflow creation",
