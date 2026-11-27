@@ -103,7 +103,7 @@ export default function ApprovalsPage() {
                     <div>
                       <div className="text-sm font-bold text-white">Execution Checkpoint: {req.id}</div>
                       <div className="text-[10px] text-gray-400 font-mono">
-                        Execution: {req.executionId} â€¢ Step: {req.stepId}
+                        Execution: {req.executionId} • Step: {req.stepId}
                       </div>
                     </div>
                   </div>

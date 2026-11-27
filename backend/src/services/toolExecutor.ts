@@ -48,7 +48,7 @@ export class ToolExecutor {
   const selected=answers[0];
   return new Promise((resolve,reject)=>{
    const request=https.get(url,{headers:{Accept:'application/json',...(credential?{Authorization:`Bearer ${credential}`}:{})},lookup:((_host:any,options:any,cb:any)=>options.all?cb(null,[{address:selected.address,family:selected.family}]):cb(null,selected.address,selected.family)) as any,timeout:Math.min(timeoutMs,15000)},response=>{
-    if(response.statusCode!==200){response.resume();return reject(new AppError(502,'External tool request failed; redirects are prohibited'));}
+    if(response.statusCode!==200){response.resume();return reject(new AppError(502,`External tool returned HTTP ${response.statusCode}; redirects are prohibited`));}
     let body='';response.on('data',chunk=>{body+=chunk;if(Buffer.byteLength(body)>1024*1024){request.destroy();reject(new AppError(502,'External response exceeds 1 MB'));}});
     response.on('end',()=>{try{resolve(JSON.parse(body));}catch{reject(new AppError(502,'External tool returned invalid JSON'));}});
    });

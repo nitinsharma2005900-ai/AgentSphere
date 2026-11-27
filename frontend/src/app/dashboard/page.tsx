@@ -78,7 +78,7 @@ export default function DashboardPage() {
             Welcome back, {user?.name || "Operator"}
           </h1>
           <p className="text-xs text-gray-400 mt-1">
-            Tenant: <span className="text-gray-200 font-semibold">{user?.organizationName}</span> â€¢
+            Tenant: <span className="text-gray-200 font-semibold">{user?.organizationName}</span> •
             Role: <span className="text-violet-300 font-mono">{user?.role?.replace(/_/g, " ")}</span>
           </p>
         </div>
@@ -139,7 +139,7 @@ export default function DashboardPage() {
             {statsLoading ? "..." : stats?.totalAgents || 3}
           </div>
           <div className="mt-1 text-[11px] text-gray-400 flex items-center gap-1">
-            <span className="text-emerald-400 font-medium">100% Active</span> â€¢ Multi-model configured
+            <span className="text-emerald-400 font-medium">100% Active</span> • Multi-model configured
           </div>
         </div>
 
@@ -155,7 +155,7 @@ export default function DashboardPage() {
             {statsLoading ? "..." : stats?.activeWorkflows || 2}
           </div>
           <div className="mt-1 text-[11px] text-gray-400 flex items-center gap-1">
-            <span className="text-emerald-400 font-medium">React Flow Canvas</span> â€¢ Automated
+            <span className="text-emerald-400 font-medium">React Flow Canvas</span> • Automated
           </div>
         </div>
 

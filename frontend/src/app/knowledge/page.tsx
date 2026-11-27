@@ -176,7 +176,7 @@ export default function KnowledgePage() {
                   <div key={idx} className="p-3 rounded-lg bg-obsidian-850 border border-white/5 text-xs">
                     <div className="flex items-center justify-between mb-1">
                       <span className="font-semibold text-indigo-300">
-                        Match #{idx + 1} Ã¢â‚¬Â¢ {res.metadata?.filename || "Document"}
+                        Match #{idx + 1} â€¢ {res.metadata?.filename || "Document"}
                       </span>
                       <span className="font-mono text-[10px] text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded">
                         Score: {(res.similarity_score * 100).toFixed(1)}%

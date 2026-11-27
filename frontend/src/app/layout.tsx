@@ -14,7 +14,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className="dark">
       <head>
-        <title>AgentSphere Ã¢â‚¬â€œ Advanced Multi-Tenant AI Agent & Workflow Platform</title>
+        <title>AgentSphere â€“ Advanced Multi-Tenant AI Agent & Workflow Platform</title>
         <meta
           name="description"
           content="Next-generation enterprise AI SaaS platform for autonomous agents, knowledge RAG, and visual workflow automation."

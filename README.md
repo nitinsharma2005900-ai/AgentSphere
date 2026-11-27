@@ -92,6 +92,7 @@ The Render service deploys manually after reviewed changes. GitHub Actions runs 
 - No email provider is configured for forgotten-password delivery. The UI reports this honestly; authenticated password changes work.
 - The deployed embedding mode is lexical feature hashing; semantic embeddings require explicit configuration and re-indexing.
 - The gateway supports streaming and structured-output validation, but a live streamed UI/model journey is not part of the verified browser evidence.
+- The public weather API succeeded locally but returned an upstream error from the hosted service; external provider availability is not guaranteed.
 - Multi-step model responses can time out. A real calculator call followed by a provider timeout is recorded in live-tool-calling.json.
 - Browser checks cover major journeys, not exhaustive permutations of every UI control or file format.
 - Free hosting has cold starts and shared worker resources; no paid availability or monitoring service is provisioned.

@@ -288,7 +288,7 @@ export default function LandingPage() {
       {/* Footer */}
       <footer className="mt-auto py-10 px-6 lg:px-16 border-t border-white/5 bg-obsidian-900 text-xs text-gray-400 flex flex-col md:flex-row items-center justify-between gap-4">
         <div>
-          <span className="font-semibold text-white">AgentSphere</span> â€“ Multi-Tenant AI Agent, Knowledge & Workflow Automation Platform
+          <span className="font-semibold text-white">AgentSphere</span> – Multi-Tenant AI Agent, Knowledge & Workflow Automation Platform
         </div>
         <div className="flex items-center gap-6">
           <Link href="/auth/login" className="hover:text-white transition">Sign In</Link>

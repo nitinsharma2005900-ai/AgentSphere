@@ -138,7 +138,7 @@ export default function PromptsPage() {
                     <div className="flex items-center justify-between mb-1">
                       <span className="text-xs font-bold text-white flex items-center gap-1.5">
                         <GitCommit className="w-3.5 h-3.5 text-violet-400" />
-                        <span>v{v.versionNumber} â€“ {v.title}</span>
+                        <span>v{v.versionNumber} – {v.title}</span>
                       </span>
                       {v.isPublished && (
                         <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
@@ -251,7 +251,7 @@ export default function PromptsPage() {
                   <div className="flex items-center justify-between text-xs">
                     <span className="font-bold text-violet-300">Execution Output</span>
                     <span className="text-[10px] font-mono text-gray-400">
-                      Tokens: {testResult.usage?.total_tokens} â€¢ Est: ${testResult.usage?.estimated_cost_usd}
+                      Tokens: {testResult.usage?.total_tokens} • Est: ${testResult.usage?.estimated_cost_usd}
                     </span>
                   </div>
                   <div className="p-3 rounded-lg bg-obsidian-900 font-mono text-xs text-gray-200 whitespace-pre-wrap leading-relaxed">

@@ -230,7 +230,7 @@ export default function WorkflowsPage() {
           </div>
           <div>
             <h1 className="text-sm font-bold text-white">Visual Workflow Automation Builder</h1>
-            <p className="text-[11px] text-gray-400">React Flow Canvas â€¢ Bounded Orchestration Engine</p>
+            <p className="text-[11px] text-gray-400">React Flow Canvas • Bounded Orchestration Engine</p>
           </div>
         </div>
 
@@ -335,7 +335,7 @@ export default function WorkflowsPage() {
                     </span>
                   </div>
                   <div className="text-[10px] text-gray-400 font-mono">
-                    ID: {activeExecutionResult.id} â€¢ Tokens: {activeExecutionResult.totalTokens}
+                    ID: {activeExecutionResult.id} • Tokens: {activeExecutionResult.totalTokens}
                   </div>
                 </div>
 

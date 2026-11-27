@@ -97,8 +97,8 @@ export default function AdminPage() {
             </div>
           </div>
           <div className="text-xs text-gray-400 space-y-1">
-            <div>â€¢ Google Gemini SDK: {gemini?.configured ? "Connected" : "Unconfigured (Safe Fallback)"}</div>
-            <div>â€¢ Mock Provider: Active (1.2ms latency)</div>
+            <div>• Google Gemini SDK: {gemini?.configured ? "Connected" : "Unconfigured (Safe Fallback)"}</div>
+            <div>• Mock Provider: Active (1.2ms latency)</div>
           </div>
         </div>
 
@@ -114,8 +114,8 @@ export default function AdminPage() {
             </div>
           </div>
           <div className="text-xs text-gray-400 space-y-1">
-            <div>â€¢ Node.js: {providerHealth?.backendService?.nodeVersion || "v22"}</div>
-            <div>â€¢ Memory: {providerHealth?.backendService?.memoryUsageMB || 45} MB</div>
+            <div>• Node.js: {providerHealth?.backendService?.nodeVersion || "v22"}</div>
+            <div>• Memory: {providerHealth?.backendService?.memoryUsageMB || 45} MB</div>
           </div>
         </div>
       </div>

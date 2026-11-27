@@ -135,9 +135,9 @@ export default function ExecutionsPage() {
                       </div>
                       <div className="text-[11px] text-gray-400 mt-0.5 flex items-center gap-3">
                         <span>Started: {new Date(exec.startTime).toLocaleTimeString()}</span>
-                        <span>â€¢</span>
+                        <span>•</span>
                         <span>Provider: <strong className="text-gray-300 capitalize">{exec.provider}</strong></span>
-                        <span>â€¢</span>
+                        <span>•</span>
                         <span>Steps: <strong className="text-gray-300">{exec.stepsTimeline?.length || 0}</strong></span>
                       </div>
                     </div>
