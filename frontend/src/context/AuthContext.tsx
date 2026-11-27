@@ -28,10 +28,11 @@ const AuthContext = createContext<AuthContextType>({} as AuthContextType);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const router=useRouter(),queryClient=useQueryClient();
-  useEffect(()=>{const expired=()=>{queryClient.clear();setUser(null);setToken(null);router.replace("/auth/login");};window.addEventListener("agentsphere:session-expired",expired);return()=>window.removeEventListener("agentsphere:session-expired",expired);},[queryClient,router]);
+
   const [user, setUser] = useState<UserProfile | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  useEffect(()=>{const expired=()=>{queryClient.clear();setUser(null);setToken(null);router.replace("/auth/login");};window.addEventListener("agentsphere:session-expired",expired);return()=>window.removeEventListener("agentsphere:session-expired",expired);},[queryClient,router]);
 
   useEffect(() => {
     const savedToken = localStorage.getItem("agentsphere_token");

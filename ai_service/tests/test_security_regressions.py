@@ -38,3 +38,12 @@ async def test_provider_outage_fails_closed_without_mock_permission(monkeypatch)
     monkeypatch.setattr(settings,'ALLOW_MOCK_PROVIDER',False)
     monkeypatch.setattr(settings,'GEMINI_FALLBACK_MODEL',None)
     with pytest.raises(RuntimeError):await gateway.generate_response([Message(role='user',content='hello')],provider_name='gemini')
+
+@pytest.mark.asyncio
+async def test_explicit_development_fallback_is_labelled(monkeypatch):
+    gateway=ProviderGateway()
+    monkeypatch.setattr(settings,'ALLOW_MOCK_PROVIDER',True)
+    monkeypatch.setattr(settings,'GEMINI_FALLBACK_MODEL',None)
+    result=await gateway.generate_response([Message(role='user',content='hello')],provider_name='gemini')
+    assert result.provider=='mock' and result.is_fallback
+    assert 'not a real AI response' in result.content

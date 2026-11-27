@@ -10,7 +10,7 @@ export const agentSchema=z.object({
  knowledgeBaseIds:z.array(id).max(50).optional(),toolPermissions:z.array(text).max(20).optional(),
  humanApprovalRequired:z.boolean().optional(),isDraft:z.boolean().optional(),isArchived:z.boolean().optional()
 }).strict();
-const node=z.object({id,type:z.enum(["start","knowledgeRetrieval","aiAgent","humanApproval","output","tool","externalTool","condition"]),position:z.object({x:z.number(),y:z.number()}),data:z.record(z.unknown())}).passthrough();
+const node=z.object({id,type:z.enum(["start","knowledgeRetrieval","aiAgent","humanApproval","output","tool","externalTool","condition"]),position:z.object({x:z.number(),y:z.number()}),data:z.record(z.string(),z.unknown())}).passthrough();
 export const workflowSchema=z.object({name:text,description:z.string().max(4000).optional(),nodes:z.array(node).min(2).max(30).optional(),
  edges:z.array(z.object({id,source:id,target:id}).passthrough()).max(60).optional(),isPublished:z.boolean().optional()}).strict();
 export const validate=(schema:ZodTypeAny):RequestHandler=>(req,res,next)=>{

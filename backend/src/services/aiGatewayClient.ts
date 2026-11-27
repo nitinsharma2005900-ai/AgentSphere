@@ -1,7 +1,7 @@
 import { config } from '../config';
 import { z } from 'zod';
 import { AppError } from './errors';
-const resultSchema=z.object({content:z.string(),tool_calls:z.array(z.object({tool_name:z.string(),arguments:z.record(z.unknown())})).nullable().optional(),finish_reason:z.string().optional(),
+const resultSchema=z.object({content:z.string(),tool_calls:z.array(z.object({tool_name:z.string(),arguments:z.record(z.string(),z.unknown())})).nullable().optional(),finish_reason:z.string().optional(),
  usage:z.object({prompt_tokens:z.number().int().nonnegative(),completion_tokens:z.number().int().nonnegative(),total_tokens:z.number().int().nonnegative(),estimated_cost_usd:z.number().nonnegative()}),provider:z.string(),model:z.string(),is_fallback:z.boolean().optional()});
 export interface GatewayGenerationResult {content:string;toolCalls?:Array<{tool_name:string;arguments:Record<string,any>}>;finishReason:string;usage:{prompt_tokens:number;completion_tokens:number;total_tokens:number;estimated_cost_usd:number};provider:string;model:string;isFallback:boolean;}
 export class AiGatewayClient {

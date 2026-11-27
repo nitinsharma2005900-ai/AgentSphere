@@ -11,7 +11,7 @@ import { ToolExecutor } from '../services/toolExecutor';
 import { encrypt } from '../services/security';
 const router=Router();router.use(authenticateToken,enforceTenantIsolation);
 const builder=requireRoles(['ORGANIZATION_OWNER','AI_BUILDER']);
-const schema=z.object({name:z.string().regex(/^[a-z][a-z0-9_]{2,60}$/),description:z.string().trim().min(1).max(2000),category:z.enum(['utility','knowledge','api','transform']).optional(),parameters:z.record(z.unknown()),endpointUrl:z.string().url().max(2000).optional(),timeoutMs:z.number().int().min(500).max(15000).optional()}).strict();
+const schema=z.object({name:z.string().regex(/^[a-z][a-z0-9_]{2,60}$/),description:z.string().trim().min(1).max(2000),category:z.enum(['utility','knowledge','api','transform']).optional(),parameters:z.record(z.string(),z.unknown()),endpointUrl:z.string().url().max(2000).optional(),timeoutMs:z.number().int().min(500).max(15000).optional()}).strict();
 router.get('/',async(req,res)=>res.json(await db.getTools(req.user!.organizationId)));
 router.post('/',builder,validate(schema),async(req,res)=>{
  const orgId=req.user!.organizationId;
@@ -43,7 +43,7 @@ router.put('/:id/credential',requireRoles(['ORGANIZATION_OWNER']),validate(z.obj
  await db.put('secrets',{id:tool.id,organizationId:req.user!.organizationId,toolId:tool.id,encryptedValue:encrypt(req.body.value)});
  return res.json({success:true,message:'Credential encrypted and stored. It cannot be read through the API.'});
 });
-router.post('/:id/test',requireRoles(['ORGANIZATION_OWNER','AI_BUILDER','WORKFLOW_OPERATOR']),validate(z.object({args:z.record(z.unknown()).optional()}).strict()),async(req,res)=>{
+router.post('/:id/test',requireRoles(['ORGANIZATION_OWNER','AI_BUILDER','WORKFLOW_OPERATOR']),validate(z.object({args:z.record(z.string(),z.unknown()).optional()}).strict()),async(req,res)=>{
  const tool=(await db.getTools(req.user!.organizationId)).find(t=>t.id===req.params.id);
  if(!tool)return res.status(404).json({error:'Tool not found'});
  const start=Date.now(),result=await ToolExecutor.executeTool(req.user!.organizationId,tool.name,req.body.args||{});

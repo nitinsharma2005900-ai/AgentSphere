@@ -1,96 +1,752 @@
 {
   "info": {
-    "name": "AgentSphere Platform API",
+    "name": "AgentSphere live API",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://agentsphere-api-nitinsharma.onrender.com/api/v1"
+    },
+    {
+      "key": "token",
+      "value": ""
+    },
+    {
+      "key": "id",
+      "value": "replace-with-resource-id"
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
   },
   "item": [
     {
-      "name": "Auth - Login (Owner)",
+      "name": "GET /access/keys",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/access/keys"
+      }
+    },
+    {
+      "name": "POST /access/keys",
       "request": {
         "method": "POST",
-        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": "{{baseUrl}}/access/keys",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{}"
+        }
+      }
+    },
+    {
+      "name": "DELETE /access/keys/{id}",
+      "request": {
+        "method": "DELETE",
+        "url": "{{baseUrl}}/access/keys/{{id}}"
+      }
+    },
+    {
+      "name": "GET /admin/audit-logs",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/admin/audit-logs"
+      }
+    },
+    {
+      "name": "GET /admin/provider-health",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/admin/provider-health"
+      }
+    },
+    {
+      "name": "GET /admin/stats",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/admin/stats"
+      }
+    },
+    {
+      "name": "GET /agents",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/agents"
+      }
+    },
+    {
+      "name": "POST /agents",
+      "request": {
+        "method": "POST",
+        "url": "{{baseUrl}}/agents",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{}"
+        }
+      }
+    },
+    {
+      "name": "GET /agents/{id}",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/agents/{{id}}"
+      }
+    },
+    {
+      "name": "PUT /agents/{id}",
+      "request": {
+        "method": "PUT",
+        "url": "{{baseUrl}}/agents/{{id}}",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{}"
+        }
+      }
+    },
+    {
+      "name": "DELETE /agents/{id}",
+      "request": {
+        "method": "DELETE",
+        "url": "{{baseUrl}}/agents/{{id}}"
+      }
+    },
+    {
+      "name": "POST /agents/{id}/duplicate",
+      "request": {
+        "method": "POST",
+        "url": "{{baseUrl}}/agents/{{id}}/duplicate",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{}"
+        }
+      }
+    },
+    {
+      "name": "POST /agents/{id}/run",
+      "request": {
+        "method": "POST",
+        "url": "{{baseUrl}}/agents/{{id}}/run",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{}"
+        }
+      }
+    },
+    {
+      "name": "GET /approvals",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/approvals"
+      }
+    },
+    {
+      "name": "POST /approvals/{id}/approve",
+      "request": {
+        "method": "POST",
+        "url": "{{baseUrl}}/approvals/{{id}}/approve",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{}"
+        }
+      }
+    },
+    {
+      "name": "POST /approvals/{id}/reject",
+      "request": {
+        "method": "POST",
+        "url": "{{baseUrl}}/approvals/{{id}}/reject",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{}"
+        }
+      }
+    },
+    {
+      "name": "POST /auth/login",
+      "request": {
+        "method": "POST",
+        "url": "{{baseUrl}}/auth/login",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
         "body": {
           "mode": "raw",
           "raw": "{\n  \"email\": \"owner@agentsphere.ai\",\n  \"password\": \"Password123!\"\n}"
-        },
-        "url": { "raw": "http://localhost:5000/api/v1/auth/login", "protocol": "http", "host": ["localhost"], "port": "5000", "path": ["api", "v1", "auth", "login"] }
+        }
       }
     },
     {
-      "name": "Agents - List All",
-      "request": {
-        "method": "GET",
-        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
-        "url": { "raw": "http://localhost:5000/api/v1/agents", "protocol": "http", "host": ["localhost"], "port": "5000", "path": ["api", "v1", "agents"] }
-      }
-    },
-    {
-      "name": "Agents - Run Execution",
+      "name": "POST /auth/signup",
       "request": {
         "method": "POST",
+        "url": "{{baseUrl}}/auth/signup",
+        "auth": {
+          "type": "noauth"
+        },
         "header": [
-          { "key": "Authorization", "value": "Bearer {{token}}" },
-          { "key": "Content-Type", "value": "application/json" }
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"prompt\": \"Please calculate 5000 * 1.18 for vendor invoice reconciliation\"\n}"
-        },
-        "url": { "raw": "http://localhost:5000/api/v1/agents/agent-financial-2/run", "protocol": "http", "host": ["localhost"], "port": "5000", "path": ["api", "v1", "agents", "agent-financial-2", "run"] }
+          "raw": "{}"
+        }
       }
     },
     {
-      "name": "Workflows - Execute Pipeline",
+      "name": "POST /auth/refresh",
       "request": {
         "method": "POST",
+        "url": "{{baseUrl}}/auth/refresh",
+        "auth": {
+          "type": "noauth"
+        },
         "header": [
-          { "key": "Authorization", "value": "Bearer {{token}}" },
-          { "key": "Content-Type", "value": "application/json" }
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"inputData\": {\n    \"invoiceId\": \"INV-9901\",\n    \"amount\": 6400.0\n  }\n}"
-        },
-        "url": { "raw": "http://localhost:5000/api/v1/workflows/wf-invoice-1/run", "protocol": "http", "host": ["localhost"], "port": "5000", "path": ["api", "v1", "workflows", "wf-invoice-1", "run"] }
+          "raw": "{}"
+        }
       }
     },
     {
-      "name": "Approvals - List Pending",
-      "request": {
-        "method": "GET",
-        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
-        "url": { "raw": "http://localhost:5000/api/v1/approvals", "protocol": "http", "host": ["localhost"], "port": "5000", "path": ["api", "v1", "approvals"] }
-      }
-    },
-    {
-      "name": "Knowledge - Semantic Search",
+      "name": "POST /auth/logout",
       "request": {
         "method": "POST",
+        "url": "{{baseUrl}}/auth/logout",
         "header": [
-          { "key": "Authorization", "value": "Bearer {{token}}" },
-          { "key": "Content-Type", "value": "application/json" }
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"query\": \"executive travel policy and rates\",\n  \"top_k\": 4\n}"
+          "raw": "{}"
+        }
+      }
+    },
+    {
+      "name": "GET /auth/me",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/auth/me"
+      }
+    },
+    {
+      "name": "POST /auth/password",
+      "request": {
+        "method": "POST",
+        "url": "{{baseUrl}}/auth/password",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{}"
+        }
+      }
+    },
+    {
+      "name": "POST /auth/forgot-password",
+      "request": {
+        "method": "POST",
+        "url": "{{baseUrl}}/auth/forgot-password",
+        "auth": {
+          "type": "noauth"
         },
-        "url": { "raw": "http://localhost:5000/api/v1/documents/search", "protocol": "http", "host": ["localhost"], "port": "5000", "path": ["api", "v1", "documents", "search"] }
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{}"
+        }
       }
     },
     {
-      "name": "Billing - Usage Telemetry",
+      "name": "GET /billing/usage",
       "request": {
         "method": "GET",
-        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
-        "url": { "raw": "http://localhost:5000/api/v1/billing/usage", "protocol": "http", "host": ["localhost"], "port": "5000", "path": ["api", "v1", "billing", "usage"] }
+        "url": "{{baseUrl}}/billing/usage"
       }
     },
     {
-      "name": "Admin - Provider Health",
+      "name": "GET /billing/invoices",
       "request": {
         "method": "GET",
-        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
-        "url": { "raw": "http://localhost:5000/api/v1/admin/provider-health", "protocol": "http", "host": ["localhost"], "port": "5000", "path": ["api", "v1", "admin", "provider-health"] }
+        "url": "{{baseUrl}}/billing/invoices"
+      }
+    },
+    {
+      "name": "POST /billing/plan",
+      "request": {
+        "method": "POST",
+        "url": "{{baseUrl}}/billing/plan",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{}"
+        }
+      }
+    },
+    {
+      "name": "GET /billing/export-report",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/billing/export-report"
+      }
+    },
+    {
+      "name": "GET /documents",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/documents"
+      }
+    },
+    {
+      "name": "POST /documents/upload",
+      "request": {
+        "method": "POST",
+        "url": "{{baseUrl}}/documents/upload"
+      }
+    },
+    {
+      "name": "POST /documents/{id}/reindex",
+      "request": {
+        "method": "POST",
+        "url": "{{baseUrl}}/documents/{{id}}/reindex",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{}"
+        }
+      }
+    },
+    {
+      "name": "DELETE /documents/{id}",
+      "request": {
+        "method": "DELETE",
+        "url": "{{baseUrl}}/documents/{{id}}"
+      }
+    },
+    {
+      "name": "POST /documents/search",
+      "request": {
+        "method": "POST",
+        "url": "{{baseUrl}}/documents/search",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{}"
+        }
+      }
+    },
+    {
+      "name": "GET /executions",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/executions"
+      }
+    },
+    {
+      "name": "GET /executions/{id}",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/executions/{{id}}"
+      }
+    },
+    {
+      "name": "POST /executions/{id}/cancel",
+      "request": {
+        "method": "POST",
+        "url": "{{baseUrl}}/executions/{{id}}/cancel",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{}"
+        }
+      }
+    },
+    {
+      "name": "POST /executions/{id}/retry",
+      "request": {
+        "method": "POST",
+        "url": "{{baseUrl}}/executions/{{id}}/retry",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{}"
+        }
+      }
+    },
+    {
+      "name": "GET /organizations/current",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/organizations/current"
+      }
+    },
+    {
+      "name": "GET /organizations/all",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/organizations/all"
+      }
+    },
+    {
+      "name": "POST /organizations/switch",
+      "request": {
+        "method": "POST",
+        "url": "{{baseUrl}}/organizations/switch",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{}"
+        }
+      }
+    },
+    {
+      "name": "GET /organizations/members",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/organizations/members"
+      }
+    },
+    {
+      "name": "POST /organizations/members",
+      "request": {
+        "method": "POST",
+        "url": "{{baseUrl}}/organizations/members",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{}"
+        }
+      }
+    },
+    {
+      "name": "GET /prompts",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/prompts"
+      }
+    },
+    {
+      "name": "POST /prompts",
+      "request": {
+        "method": "POST",
+        "url": "{{baseUrl}}/prompts",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{}"
+        }
+      }
+    },
+    {
+      "name": "POST /prompts/{id}/publish",
+      "request": {
+        "method": "POST",
+        "url": "{{baseUrl}}/prompts/{{id}}/publish",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{}"
+        }
+      }
+    },
+    {
+      "name": "POST /prompts/test",
+      "request": {
+        "method": "POST",
+        "url": "{{baseUrl}}/prompts/test",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{}"
+        }
+      }
+    },
+    {
+      "name": "GET /tools",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/tools"
+      }
+    },
+    {
+      "name": "POST /tools",
+      "request": {
+        "method": "POST",
+        "url": "{{baseUrl}}/tools",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{}"
+        }
+      }
+    },
+    {
+      "name": "PUT /tools/{id}",
+      "request": {
+        "method": "PUT",
+        "url": "{{baseUrl}}/tools/{{id}}",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{}"
+        }
+      }
+    },
+    {
+      "name": "PATCH /tools/{id}/toggle",
+      "request": {
+        "method": "PATCH",
+        "url": "{{baseUrl}}/tools/{{id}}/toggle",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{}"
+        }
+      }
+    },
+    {
+      "name": "PUT /tools/{id}/credential",
+      "request": {
+        "method": "PUT",
+        "url": "{{baseUrl}}/tools/{{id}}/credential",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{}"
+        }
+      }
+    },
+    {
+      "name": "POST /tools/{id}/test",
+      "request": {
+        "method": "POST",
+        "url": "{{baseUrl}}/tools/{{id}}/test",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{}"
+        }
+      }
+    },
+    {
+      "name": "GET /workflows",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/workflows"
+      }
+    },
+    {
+      "name": "POST /workflows",
+      "request": {
+        "method": "POST",
+        "url": "{{baseUrl}}/workflows",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{}"
+        }
+      }
+    },
+    {
+      "name": "GET /workflows/{id}",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/workflows/{{id}}"
+      }
+    },
+    {
+      "name": "PUT /workflows/{id}",
+      "request": {
+        "method": "PUT",
+        "url": "{{baseUrl}}/workflows/{{id}}",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{}"
+        }
+      }
+    },
+    {
+      "name": "DELETE /workflows/{id}",
+      "request": {
+        "method": "DELETE",
+        "url": "{{baseUrl}}/workflows/{{id}}"
+      }
+    },
+    {
+      "name": "POST /workflows/{id}/run",
+      "request": {
+        "method": "POST",
+        "url": "{{baseUrl}}/workflows/{{id}}/run",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{}"
+        }
       }
     }
   ]

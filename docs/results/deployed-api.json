@@ -1,0 +1,74 @@
+{
+  "base_url": "https://agentsphere-api-nitinsharma.onrender.com/api/v1",
+  "results": [
+    {
+      "test": "tenant agent listing",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "test": "tenant switch blocked",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "test": "real document ingestion",
+      "passed": true,
+      "detail": "201"
+    },
+    {
+      "test": "actual source retrieval",
+      "passed": true,
+      "detail": "200"
+    },
+    {
+      "test": "cross-tenant retrieval blocked",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "test": "repeatable reindex",
+      "passed": true,
+      "detail": "200"
+    },
+    {
+      "test": "agent creation",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "test": "real Gemini RAG execution",
+      "passed": true,
+      "detail": "{'text': 'The invoice approval threshold is 5000 USD, and the verification reference is ORBIT-742.\\n\\nSource: verification-policy.txt (chunk 8fb48f15-b7c4-455f-b0ab-00d2cb4c2418_chunk_0)', 'provider': 'gemini', 'citations': [{'content': 'AgentSphere verification policy: invoice approval threshold is"
+    },
+    {
+      "test": "workflow creation",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "test": "worker pauses for approval",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "test": "approval executes downstream tools",
+      "passed": true,
+      "detail": "None"
+    },
+    {
+      "test": "authenticated CSV download",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "test": "configured real gateway",
+      "passed": true,
+      "detail": ""
+    }
+  ],
+  "passed": 13,
+  "total": 13,
+  "real_model": true,
+  "mock_used": false
+}

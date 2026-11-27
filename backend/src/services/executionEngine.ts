@@ -207,7 +207,7 @@ export class ExecutionEngine {
  }
  static async recoverInterrupted(){
   for(const org of await db.getAllOrganizations())for(const record of await db.getExecutions(org.id)){
-   if(record.status==='RUNNING'){if(record.reservedTokens)await this.settle(record);await db.updateExecution(org.id,record.id,{status:'FAILED',error:'Process restarted during execution. Review trace and retry the interrupted step.',endTime:new Date().toISOString()});}
+   if(record.status==='RUNNING'){if(record.reservedTokens)await this.settle(record);const error='Process restarted during execution. Review trace and retry the interrupted step.';record.stepsTimeline.push({stepIndex:record.stepsTimeline.length+1,nodeId:record.checkpoint?.cursor,name:'Interrupted step',status:'FAILED',inputData:null,outputData:null,tokensUsed:0,durationMs:0,timestamp:new Date().toISOString(),error});await db.updateExecution(org.id,record.id,{status:'FAILED',error,stepsTimeline:record.stepsTimeline,endTime:new Date().toISOString()});}
   }
  }
 }

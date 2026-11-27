@@ -1,134 +1,1968 @@
 {
   "openapi": "3.0.3",
   "info": {
-    "title": "AgentSphere API",
-    "version": "1.0.0",
-    "description": "Enterprise Multi-Tenant AI Agent, Knowledge & Workflow Automation Platform Specification"
+    "title": "AgentSphere Core API",
+    "version": "1.1.0",
+    "description": "Tenant scoped sessions, revocable API keys, queued executions and approval checkpoints. Billing is simulated. API keys may access only their explicit scopes. Poll executions until terminal status or approval pause."
   },
   "servers": [
     {
-      "url": "http://localhost:5000/api/v1",
-      "description": "Local Core Backend Service"
+      "url": "https://agentsphere-api-nitinsharma.onrender.com/api/v1"
     },
     {
-      "url": "http://localhost:8000/api/v1",
-      "description": "FastAPI AI Inference & Document Gateway"
+      "url": "http://localhost:5000/api/v1"
+    }
+  ],
+  "security": [
+    {
+      "BearerAuth": []
     }
   ],
   "components": {
     "securitySchemes": {
       "BearerAuth": {
         "type": "http",
-        "scheme": "bearer",
-        "bearerFormat": "JWT"
+        "scheme": "bearer"
       }
     }
   },
   "paths": {
-    "/auth/login": {
+    "/access/keys": {
+      "get": {
+        "summary": "GET /access/keys",
+        "tags": [
+          "access"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response. Executions may be queued or paused; poll the execution status."
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Tenant, role, or API-key scope denied"
+          },
+          "503": {
+            "description": "Dependency unavailable; no fake result is returned"
+          }
+        }
+      },
       "post": {
-        "summary": "Authenticate user session and return scoped JWT token",
-        "tags": ["Authentication"],
+        "summary": "POST /access/keys",
+        "tags": [
+          "access"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response. Executions may be queued or paused; poll the execution status."
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Tenant, role, or API-key scope denied"
+          },
+          "503": {
+            "description": "Dependency unavailable; no fake result is returned"
+          }
+        },
         "requestBody": {
-          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/access/keys/{id}": {
+      "delete": {
+        "summary": "DELETE /access/keys/{id}",
+        "tags": [
+          "access"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response. Executions may be queued or paused; poll the execution status."
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Tenant, role, or API-key scope denied"
+          },
+          "503": {
+            "description": "Dependency unavailable; no fake result is returned"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/admin/audit-logs": {
+      "get": {
+        "summary": "GET /admin/audit-logs",
+        "tags": [
+          "admin"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response. Executions may be queued or paused; poll the execution status."
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Tenant, role, or API-key scope denied"
+          },
+          "503": {
+            "description": "Dependency unavailable; no fake result is returned"
+          }
+        }
+      }
+    },
+    "/admin/provider-health": {
+      "get": {
+        "summary": "GET /admin/provider-health",
+        "tags": [
+          "admin"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response. Executions may be queued or paused; poll the execution status."
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Tenant, role, or API-key scope denied"
+          },
+          "503": {
+            "description": "Dependency unavailable; no fake result is returned"
+          }
+        }
+      }
+    },
+    "/admin/stats": {
+      "get": {
+        "summary": "GET /admin/stats",
+        "tags": [
+          "admin"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response. Executions may be queued or paused; poll the execution status."
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Tenant, role, or API-key scope denied"
+          },
+          "503": {
+            "description": "Dependency unavailable; no fake result is returned"
+          }
+        }
+      }
+    },
+    "/agents": {
+      "get": {
+        "summary": "GET /agents",
+        "tags": [
+          "agents"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response. Executions may be queued or paused; poll the execution status."
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Tenant, role, or API-key scope denied"
+          },
+          "503": {
+            "description": "Dependency unavailable; no fake result is returned"
+          }
+        }
+      },
+      "post": {
+        "summary": "POST /agents",
+        "tags": [
+          "agents"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response. Executions may be queued or paused; poll the execution status."
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Tenant, role, or API-key scope denied"
+          },
+          "503": {
+            "description": "Dependency unavailable; no fake result is returned"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/agents/{id}": {
+      "get": {
+        "summary": "GET /agents/{id}",
+        "tags": [
+          "agents"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response. Executions may be queued or paused; poll the execution status."
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Tenant, role, or API-key scope denied"
+          },
+          "503": {
+            "description": "Dependency unavailable; no fake result is returned"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      },
+      "put": {
+        "summary": "PUT /agents/{id}",
+        "tags": [
+          "agents"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response. Executions may be queued or paused; poll the execution status."
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Tenant, role, or API-key scope denied"
+          },
+          "503": {
+            "description": "Dependency unavailable; no fake result is returned"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "DELETE /agents/{id}",
+        "tags": [
+          "agents"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response. Executions may be queued or paused; poll the execution status."
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Tenant, role, or API-key scope denied"
+          },
+          "503": {
+            "description": "Dependency unavailable; no fake result is returned"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/agents/{id}/duplicate": {
+      "post": {
+        "summary": "POST /agents/{id}/duplicate",
+        "tags": [
+          "agents"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response. Executions may be queued or paused; poll the execution status."
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Tenant, role, or API-key scope denied"
+          },
+          "503": {
+            "description": "Dependency unavailable; no fake result is returned"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/agents/{id}/run": {
+      "post": {
+        "summary": "POST /agents/{id}/run",
+        "tags": [
+          "agents"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response. Executions may be queued or paused; poll the execution status."
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Tenant, role, or API-key scope denied"
+          },
+          "503": {
+            "description": "Dependency unavailable; no fake result is returned"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
+                "required": [
+                  "prompt"
+                ],
                 "properties": {
-                  "email": { "type": "string" },
-                  "password": { "type": "string" }
-                },
-                "required": ["email", "password"]
+                  "prompt": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 32000
+                  }
+                }
               }
             }
           }
-        },
+        }
+      }
+    },
+    "/approvals": {
+      "get": {
+        "summary": "GET /approvals",
+        "tags": [
+          "approvals"
+        ],
         "responses": {
-          "200": { "description": "Authentication successful" },
-          "401": { "description": "Invalid credentials" }
+          "200": {
+            "description": "Successful response. Executions may be queued or paused; poll the execution status."
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Tenant, role, or API-key scope denied"
+          },
+          "503": {
+            "description": "Dependency unavailable; no fake result is returned"
+          }
+        }
+      }
+    },
+    "/approvals/{id}/approve": {
+      "post": {
+        "summary": "POST /approvals/{id}/approve",
+        "tags": [
+          "approvals"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response. Executions may be queued or paused; poll the execution status."
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Tenant, role, or API-key scope denied"
+          },
+          "503": {
+            "description": "Dependency unavailable; no fake result is returned"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/approvals/{id}/reject": {
+      "post": {
+        "summary": "POST /approvals/{id}/reject",
+        "tags": [
+          "approvals"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response. Executions may be queued or paused; poll the execution status."
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Tenant, role, or API-key scope denied"
+          },
+          "503": {
+            "description": "Dependency unavailable; no fake result is returned"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "summary": "POST /auth/login",
+        "tags": [
+          "auth"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response. Executions may be queued or paused; poll the execution status."
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Tenant, role, or API-key scope denied"
+          },
+          "503": {
+            "description": "Dependency unavailable; no fake result is returned"
+          }
+        },
+        "security": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/signup": {
+      "post": {
+        "summary": "POST /auth/signup",
+        "tags": [
+          "auth"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response. Executions may be queued or paused; poll the execution status."
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Tenant, role, or API-key scope denied"
+          },
+          "503": {
+            "description": "Dependency unavailable; no fake result is returned"
+          }
+        },
+        "security": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/refresh": {
+      "post": {
+        "summary": "POST /auth/refresh",
+        "tags": [
+          "auth"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response. Executions may be queued or paused; poll the execution status."
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Tenant, role, or API-key scope denied"
+          },
+          "503": {
+            "description": "Dependency unavailable; no fake result is returned"
+          }
+        },
+        "security": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "summary": "POST /auth/logout",
+        "tags": [
+          "auth"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response. Executions may be queued or paused; poll the execution status."
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Tenant, role, or API-key scope denied"
+          },
+          "503": {
+            "description": "Dependency unavailable; no fake result is returned"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
         }
       }
     },
     "/auth/me": {
       "get": {
-        "summary": "Get authenticated user profile and organization partition",
-        "tags": ["Authentication"],
-        "security": [{ "BearerAuth": [] }],
-        "responses": { "200": { "description": "Profile retrieved" } }
+        "summary": "GET /auth/me",
+        "tags": [
+          "auth"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response. Executions may be queued or paused; poll the execution status."
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Tenant, role, or API-key scope denied"
+          },
+          "503": {
+            "description": "Dependency unavailable; no fake result is returned"
+          }
+        }
       }
     },
-    "/agents": {
-      "get": {
-        "summary": "List agents for authenticated tenant organization",
-        "tags": ["Agent Studio"],
-        "security": [{ "BearerAuth": [] }],
-        "responses": { "200": { "description": "Agents list" } }
-      },
+    "/auth/password": {
       "post": {
-        "summary": "Create new AI agent",
-        "tags": ["Agent Studio"],
-        "security": [{ "BearerAuth": [] }],
-        "responses": { "201": { "description": "Agent created" } }
+        "summary": "POST /auth/password",
+        "tags": [
+          "auth"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response. Executions may be queued or paused; poll the execution status."
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Tenant, role, or API-key scope denied"
+          },
+          "503": {
+            "description": "Dependency unavailable; no fake result is returned"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        }
       }
     },
-    "/agents/{id}/run": {
+    "/auth/forgot-password": {
       "post": {
-        "summary": "Execute agent with prompt input and tool calling",
-        "tags": ["Agent Studio"],
-        "security": [{ "BearerAuth": [] }],
-        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }],
-        "responses": { "200": { "description": "Execution record trace" } }
-      }
-    },
-    "/workflows/{id}/run": {
-      "post": {
-        "summary": "Execute complete visual workflow pipeline",
-        "tags": ["Visual Workflows"],
-        "security": [{ "BearerAuth": [] }],
-        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }],
-        "responses": { "200": { "description": "Workflow execution trace" } }
-      }
-    },
-    "/documents/upload": {
-      "post": {
-        "summary": "Upload and index document into pgvector store",
-        "tags": ["Knowledge & RAG"],
-        "security": [{ "BearerAuth": [] }],
-        "responses": { "201": { "description": "Document indexed" } }
-      }
-    },
-    "/documents/search": {
-      "post": {
-        "summary": "Semantic cosine similarity search across tenant chunks",
-        "tags": ["Knowledge & RAG"],
-        "security": [{ "BearerAuth": [] }],
-        "responses": { "200": { "description": "Search matches" } }
-      }
-    },
-    "/approvals/{id}/approve": {
-      "post": {
-        "summary": "Authorize pending execution checkpoint and resume pipeline",
-        "tags": ["Human Approvals"],
-        "security": [{ "BearerAuth": [] }],
-        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }],
-        "responses": { "200": { "description": "Execution resumed" } }
+        "summary": "POST /auth/forgot-password",
+        "tags": [
+          "auth"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response. Executions may be queued or paused; poll the execution status."
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Tenant, role, or API-key scope denied"
+          },
+          "503": {
+            "description": "Dependency unavailable; no fake result is returned"
+          }
+        },
+        "security": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        }
       }
     },
     "/billing/usage": {
       "get": {
-        "summary": "Get organization token limits and consumption telemetry",
-        "tags": ["Usage & Billing"],
-        "security": [{ "BearerAuth": [] }],
-        "responses": { "200": { "description": "Usage limits" } }
+        "summary": "GET /billing/usage",
+        "tags": [
+          "billing"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response. Executions may be queued or paused; poll the execution status."
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Tenant, role, or API-key scope denied"
+          },
+          "503": {
+            "description": "Dependency unavailable; no fake result is returned"
+          }
+        }
       }
     },
-    "/admin/provider-health": {
+    "/billing/invoices": {
       "get": {
-        "summary": "Live provider telemetry (Google Gemini SDK and Mock Provider)",
-        "tags": ["Administration"],
-        "security": [{ "BearerAuth": [] }],
-        "responses": { "200": { "description": "Telemetry status" } }
+        "summary": "GET /billing/invoices",
+        "tags": [
+          "billing"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response. Executions may be queued or paused; poll the execution status."
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Tenant, role, or API-key scope denied"
+          },
+          "503": {
+            "description": "Dependency unavailable; no fake result is returned"
+          }
+        }
+      }
+    },
+    "/billing/plan": {
+      "post": {
+        "summary": "POST /billing/plan",
+        "tags": [
+          "billing"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response. Executions may be queued or paused; poll the execution status."
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Tenant, role, or API-key scope denied"
+          },
+          "503": {
+            "description": "Dependency unavailable; no fake result is returned"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/billing/export-report": {
+      "get": {
+        "summary": "GET /billing/export-report",
+        "tags": [
+          "billing"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response. Executions may be queued or paused; poll the execution status."
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Tenant, role, or API-key scope denied"
+          },
+          "503": {
+            "description": "Dependency unavailable; no fake result is returned"
+          }
+        }
+      }
+    },
+    "/documents": {
+      "get": {
+        "summary": "GET /documents",
+        "tags": [
+          "documents"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response. Executions may be queued or paused; poll the execution status."
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Tenant, role, or API-key scope denied"
+          },
+          "503": {
+            "description": "Dependency unavailable; no fake result is returned"
+          }
+        }
+      }
+    },
+    "/documents/upload": {
+      "post": {
+        "summary": "POST /documents/upload",
+        "tags": [
+          "documents"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response. Executions may be queued or paused; poll the execution status."
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Tenant, role, or API-key scope denied"
+          },
+          "503": {
+            "description": "Dependency unavailable; no fake result is returned"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "file"
+                ],
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "PDF/TXT/DOCX/CSV/MD; maximum 4 MB"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/documents/{id}/reindex": {
+      "post": {
+        "summary": "POST /documents/{id}/reindex",
+        "tags": [
+          "documents"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response. Executions may be queued or paused; poll the execution status."
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Tenant, role, or API-key scope denied"
+          },
+          "503": {
+            "description": "Dependency unavailable; no fake result is returned"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/documents/{id}": {
+      "delete": {
+        "summary": "DELETE /documents/{id}",
+        "tags": [
+          "documents"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response. Executions may be queued or paused; poll the execution status."
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Tenant, role, or API-key scope denied"
+          },
+          "503": {
+            "description": "Dependency unavailable; no fake result is returned"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/documents/search": {
+      "post": {
+        "summary": "POST /documents/search",
+        "tags": [
+          "documents"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response. Executions may be queued or paused; poll the execution status."
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Tenant, role, or API-key scope denied"
+          },
+          "503": {
+            "description": "Dependency unavailable; no fake result is returned"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/executions": {
+      "get": {
+        "summary": "GET /executions",
+        "tags": [
+          "executions"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response. Executions may be queued or paused; poll the execution status."
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Tenant, role, or API-key scope denied"
+          },
+          "503": {
+            "description": "Dependency unavailable; no fake result is returned"
+          }
+        }
+      }
+    },
+    "/executions/{id}": {
+      "get": {
+        "summary": "GET /executions/{id}",
+        "tags": [
+          "executions"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response. Executions may be queued or paused; poll the execution status."
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Tenant, role, or API-key scope denied"
+          },
+          "503": {
+            "description": "Dependency unavailable; no fake result is returned"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/executions/{id}/cancel": {
+      "post": {
+        "summary": "POST /executions/{id}/cancel",
+        "tags": [
+          "executions"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response. Executions may be queued or paused; poll the execution status."
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Tenant, role, or API-key scope denied"
+          },
+          "503": {
+            "description": "Dependency unavailable; no fake result is returned"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/executions/{id}/retry": {
+      "post": {
+        "summary": "POST /executions/{id}/retry",
+        "tags": [
+          "executions"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response. Executions may be queued or paused; poll the execution status."
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Tenant, role, or API-key scope denied"
+          },
+          "503": {
+            "description": "Dependency unavailable; no fake result is returned"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/organizations/current": {
+      "get": {
+        "summary": "GET /organizations/current",
+        "tags": [
+          "organizations"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response. Executions may be queued or paused; poll the execution status."
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Tenant, role, or API-key scope denied"
+          },
+          "503": {
+            "description": "Dependency unavailable; no fake result is returned"
+          }
+        }
+      }
+    },
+    "/organizations/all": {
+      "get": {
+        "summary": "GET /organizations/all",
+        "tags": [
+          "organizations"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response. Executions may be queued or paused; poll the execution status."
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Tenant, role, or API-key scope denied"
+          },
+          "503": {
+            "description": "Dependency unavailable; no fake result is returned"
+          }
+        }
+      }
+    },
+    "/organizations/switch": {
+      "post": {
+        "summary": "POST /organizations/switch",
+        "tags": [
+          "organizations"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response. Executions may be queued or paused; poll the execution status."
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Tenant, role, or API-key scope denied"
+          },
+          "503": {
+            "description": "Dependency unavailable; no fake result is returned"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/organizations/members": {
+      "get": {
+        "summary": "GET /organizations/members",
+        "tags": [
+          "organizations"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response. Executions may be queued or paused; poll the execution status."
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Tenant, role, or API-key scope denied"
+          },
+          "503": {
+            "description": "Dependency unavailable; no fake result is returned"
+          }
+        }
+      },
+      "post": {
+        "summary": "POST /organizations/members",
+        "tags": [
+          "organizations"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response. Executions may be queued or paused; poll the execution status."
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Tenant, role, or API-key scope denied"
+          },
+          "503": {
+            "description": "Dependency unavailable; no fake result is returned"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/prompts": {
+      "get": {
+        "summary": "GET /prompts",
+        "tags": [
+          "prompts"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response. Executions may be queued or paused; poll the execution status."
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Tenant, role, or API-key scope denied"
+          },
+          "503": {
+            "description": "Dependency unavailable; no fake result is returned"
+          }
+        }
+      },
+      "post": {
+        "summary": "POST /prompts",
+        "tags": [
+          "prompts"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response. Executions may be queued or paused; poll the execution status."
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Tenant, role, or API-key scope denied"
+          },
+          "503": {
+            "description": "Dependency unavailable; no fake result is returned"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/prompts/{id}/publish": {
+      "post": {
+        "summary": "POST /prompts/{id}/publish",
+        "tags": [
+          "prompts"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response. Executions may be queued or paused; poll the execution status."
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Tenant, role, or API-key scope denied"
+          },
+          "503": {
+            "description": "Dependency unavailable; no fake result is returned"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/prompts/test": {
+      "post": {
+        "summary": "POST /prompts/test",
+        "tags": [
+          "prompts"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response. Executions may be queued or paused; poll the execution status."
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Tenant, role, or API-key scope denied"
+          },
+          "503": {
+            "description": "Dependency unavailable; no fake result is returned"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tools": {
+      "get": {
+        "summary": "GET /tools",
+        "tags": [
+          "tools"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response. Executions may be queued or paused; poll the execution status."
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Tenant, role, or API-key scope denied"
+          },
+          "503": {
+            "description": "Dependency unavailable; no fake result is returned"
+          }
+        }
+      },
+      "post": {
+        "summary": "POST /tools",
+        "tags": [
+          "tools"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response. Executions may be queued or paused; poll the execution status."
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Tenant, role, or API-key scope denied"
+          },
+          "503": {
+            "description": "Dependency unavailable; no fake result is returned"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tools/{id}": {
+      "put": {
+        "summary": "PUT /tools/{id}",
+        "tags": [
+          "tools"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response. Executions may be queued or paused; poll the execution status."
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Tenant, role, or API-key scope denied"
+          },
+          "503": {
+            "description": "Dependency unavailable; no fake result is returned"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tools/{id}/toggle": {
+      "patch": {
+        "summary": "PATCH /tools/{id}/toggle",
+        "tags": [
+          "tools"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response. Executions may be queued or paused; poll the execution status."
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Tenant, role, or API-key scope denied"
+          },
+          "503": {
+            "description": "Dependency unavailable; no fake result is returned"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tools/{id}/credential": {
+      "put": {
+        "summary": "PUT /tools/{id}/credential",
+        "tags": [
+          "tools"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response. Executions may be queued or paused; poll the execution status."
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Tenant, role, or API-key scope denied"
+          },
+          "503": {
+            "description": "Dependency unavailable; no fake result is returned"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tools/{id}/test": {
+      "post": {
+        "summary": "POST /tools/{id}/test",
+        "tags": [
+          "tools"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response. Executions may be queued or paused; poll the execution status."
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Tenant, role, or API-key scope denied"
+          },
+          "503": {
+            "description": "Dependency unavailable; no fake result is returned"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/workflows": {
+      "get": {
+        "summary": "GET /workflows",
+        "tags": [
+          "workflows"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response. Executions may be queued or paused; poll the execution status."
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Tenant, role, or API-key scope denied"
+          },
+          "503": {
+            "description": "Dependency unavailable; no fake result is returned"
+          }
+        }
+      },
+      "post": {
+        "summary": "POST /workflows",
+        "tags": [
+          "workflows"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response. Executions may be queued or paused; poll the execution status."
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Tenant, role, or API-key scope denied"
+          },
+          "503": {
+            "description": "Dependency unavailable; no fake result is returned"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/workflows/{id}": {
+      "get": {
+        "summary": "GET /workflows/{id}",
+        "tags": [
+          "workflows"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response. Executions may be queued or paused; poll the execution status."
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Tenant, role, or API-key scope denied"
+          },
+          "503": {
+            "description": "Dependency unavailable; no fake result is returned"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      },
+      "put": {
+        "summary": "PUT /workflows/{id}",
+        "tags": [
+          "workflows"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response. Executions may be queued or paused; poll the execution status."
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Tenant, role, or API-key scope denied"
+          },
+          "503": {
+            "description": "Dependency unavailable; no fake result is returned"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "DELETE /workflows/{id}",
+        "tags": [
+          "workflows"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response. Executions may be queued or paused; poll the execution status."
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Tenant, role, or API-key scope denied"
+          },
+          "503": {
+            "description": "Dependency unavailable; no fake result is returned"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/workflows/{id}/run": {
+      "post": {
+        "summary": "POST /workflows/{id}/run",
+        "tags": [
+          "workflows"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response. Executions may be queued or paused; poll the execution status."
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Tenant, role, or API-key scope denied"
+          },
+          "503": {
+            "description": "Dependency unavailable; no fake result is returned"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        }
       }
     }
   }

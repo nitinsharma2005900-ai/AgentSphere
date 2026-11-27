@@ -1,0 +1,24 @@
+{
+  "status": "FAILED",
+  "provider": "gemini",
+  "output": null,
+  "tools": [
+    {
+      "name": "Tool Call: calculator",
+      "status": "SUCCESS",
+      "inputData": {
+        "expression": "17 * 19"
+      },
+      "stepIndex": 2,
+      "timestamp": "2026-11-27T14:25:10.905Z",
+      "durationMs": 4,
+      "outputData": {
+        "result": 323,
+        "expression": "17 * 19"
+      },
+      "tokensUsed": 0
+    }
+  ],
+  "error": "AI gateway unavailable or timed out. Check service health and retry.",
+  "passed": false
+}

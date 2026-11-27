@@ -1,0 +1,96 @@
+{
+  "reviewed": 15,
+  "all_assessments_fully_complete": false,
+  "assessments": [
+    {
+      "id": "01",
+      "assessment": "AI SaaS frontend",
+      "status": "Verified major flows",
+      "evidence": "Browser navigation, modals, tool execution, CSV download and mobile navigation; premium styles retained."
+    },
+    {
+      "id": "02",
+      "assessment": "AI platform backend",
+      "status": "Verified",
+      "evidence": "57 documented core API operations; 29 backend tests and 13 live API checks."
+    },
+    {
+      "id": "03",
+      "assessment": "AI data architecture",
+      "status": "Verified with documented tradeoff",
+      "evidence": "PostgreSQL authoritative records, tenant indexes, constraints and transactions; JSONB payloads and stored vectors; 15-table restore verified."
+    },
+    {
+      "id": "04",
+      "assessment": "AI platform security",
+      "status": "Verified tested boundaries",
+      "evidence": "Membership, RBAC, rotation/revocation, scoped API keys, encrypted secrets, tool allowlists, SSRF and output safeguards."
+    },
+    {
+      "id": "05",
+      "assessment": "Python document pipeline",
+      "status": "Verified tested formats and boundaries",
+      "evidence": "Real TXT upload/reindex/retrieval; supported PDF/TXT/DOCX/CSV/MD parsers; invalid PDF/DOCX/empty files tested."
+    },
+    {
+      "id": "06",
+      "assessment": "FastAPI model gateway",
+      "status": "Implemented; streaming live-provider verification limited",
+      "evidence": "Official Gemini SDK, validated requests, bounded retries, streaming endpoint, usage and provider configuration probes. Mock adapter only when explicitly enabled."
+    },
+    {
+      "id": "07",
+      "assessment": "Agent orchestration engine",
+      "status": "Verified principal flows",
+      "evidence": "Persisted checkpoints, queued execution, real downstream approval continuation, bounded loops and quotas. A live multi-step tool run reached the tool then hit provider timeout."
+    },
+    {
+      "id": "08",
+      "assessment": "AI provider integrations",
+      "status": "Verified with limitation",
+      "evidence": "Live Gemini inference and RAG verified; real model-selected calculator call returned 323, subsequent inference timed out. Local deterministic vector embeddings are the deployed default."
+    },
+    {
+      "id": "09",
+      "assessment": "Docker AI infrastructure",
+      "status": "Deployed combined-service topology",
+      "evidence": "Free Render container runs API, inference gateway, worker and Redis; Neon owns persistent data. Compose separates persistence services. Dedicated always-on worker hosting is not provisioned."
+    },
+    {
+      "id": "10",
+      "assessment": "Git and prompt governance",
+      "status": "Partial: provider restriction",
+      "evidence": "Private repository and prompt/tool schema versioning implemented. GitHub rejected branch protection with HTTP 403 requiring Pro or public visibility."
+    },
+    {
+      "id": "11",
+      "assessment": "CI/CD and evaluations",
+      "status": "Implemented; protected release approvals unavailable",
+      "evidence": "GitHub Actions runs Python and backend tests, frontend checks, Compose validation and Docker builds. Manual production deployment authorized by user; branch protection restriction remains."
+    },
+    {
+      "id": "12",
+      "assessment": "Safety and reliability tests",
+      "status": "Verified tested cases",
+      "evidence": "21 Python tests and 29 backend tests; injection, isolation, role escalation, replay, unsafe tools, loop and quota regression coverage."
+    },
+    {
+      "id": "13",
+      "assessment": "API documentation",
+      "status": "Updated",
+      "evidence": "Core OpenAPI, FastAPI OpenAPI, and Postman collection match current route inventory. Some complex payloads use general object schemas."
+    },
+    {
+      "id": "14",
+      "assessment": "AI SaaS deployment",
+      "status": "Live with free-hosting limits",
+      "evidence": "Vercel frontend, free Render platform, free Neon persistence, healthy Redis; cold starts, shared worker resources, and provider timeouts remain."
+    },
+    {
+      "id": "15",
+      "assessment": "Incident simulation",
+      "status": "Evidence-based RCA",
+      "evidence": "Actual tenant-switch, signup, queued approval, retired model and provider-timeout incidents documented; no fabricated incident statistics."
+    }
+  ]
+}

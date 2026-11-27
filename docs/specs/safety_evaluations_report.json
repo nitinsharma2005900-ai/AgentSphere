@@ -1,33 +1,6 @@
 {
-  "timestamp": 1795780509.1219206,
-  "total_evaluations": 6,
-  "passed": 6,
-  "failed": 0,
-  "success_rate": 100.0,
-  "details": [
-    {
-      "test": "Prompt Injection Defense (Assessment 04 & 12)",
-      "passed": true
-    },
-    {
-      "test": "Tool Allowlist & SSRF Defense (Assessment 04 & 11)",
-      "passed": true
-    },
-    {
-      "test": "Output Credential Redaction (Assessment 04 & 12)",
-      "passed": true
-    },
-    {
-      "test": "Cross-Tenant Data Isolation (Assessment 03, 04, 12)",
-      "passed": true
-    },
-    {
-      "test": "Runaway Loop Bounded Guardrail (Assessment 07 & 15)",
-      "passed": true
-    },
-    {
-      "test": "Organization Token Quota Pre-Check (Assessment 14 & 15)",
-      "passed": true
-    }
-  ]
+  "command": "C:\\Users\\amits\\AppData\\Local\\Programs\\Python\\Python313\\python.exe -m pytest ai_service/tests/test_security_regressions.py ai_service/tests/test_ai_gateway.py -q --junitxml=docs/results/safety-tests.xml",
+  "exit_code": 0,
+  "scope": "Python guardrail and pipeline regression checks. Engine limits, quotas, RBAC, and tool execution are covered separately by backend tests. Live model inference is verified separately.",
+  "passed": true
 }

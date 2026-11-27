@@ -1,0 +1,22 @@
+{
+  "backup": "AES-256 authenticated encrypted artifact (ignored data directory)",
+  "restore": "Full schema and all application tables restored in isolated schema; transaction rolled back after verification",
+  "table_counts": {
+    "organizations": 2,
+    "users": 6,
+    "agents": 6,
+    "prompt_versions": 2,
+    "tools": 5,
+    "workflows": 2,
+    "executions": 5,
+    "approval_requests": 2,
+    "documents": 0,
+    "audit_logs": 35,
+    "invoices": 0,
+    "sessions": 7,
+    "api_keys": 0,
+    "secrets": 0,
+    "document_chunks": 0
+  },
+  "passed": true
+}

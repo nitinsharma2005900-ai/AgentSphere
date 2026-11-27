@@ -22,3 +22,20 @@ test('approval continues downstream tool nodes and rejects duplicate decisions',
  const paused=await ExecutionEngine.runWorkflow('org-acme-1',wf.id,{});expect(paused.status).toBe('PAUSED_APPROVAL');const completed=await ExecutionEngine.resumeExecution('org-acme-1',paused.id,true,'Approved','owner@agentsphere.ai');expect(completed.status).toBe('COMPLETED');expect(completed.output.toolResult.result).toBe(42);await expect(ExecutionEngine.resumeExecution('org-acme-1',paused.id,true)).rejects.toThrow();
 });
 test('provider outage records failure and does not fabricate output',async()=>{jest.spyOn(AiGatewayClient,'generate').mockRejectedValueOnce(new Error('offline'));const result=await ExecutionEngine.runAgent('org-acme-1','agent-concierge-1','Explain uptime');expect(result.status).toBe('FAILED');expect(result.output).toBeUndefined();});
+test('runaway tool loop stops at the configured step budget',async()=>{
+ const original=(await db.getAgentById('org-acme-1','agent-concierge-1'))!;
+ await db.updateAgent('org-acme-1',original.id,{maxSteps:2,toolPermissions:['date_time']});
+ const generate=jest.spyOn(AiGatewayClient,'generate').mockResolvedValue({content:'[TEST MOCK] tool call',toolCalls:[{tool_name:'date_time',arguments:{format:'iso'}}],finishReason:'tool_calls',provider:'mock',model:'test',isFallback:false,usage:{prompt_tokens:1,completion_tokens:1,total_tokens:2,estimated_cost_usd:0}});
+ try{const result=await ExecutionEngine.runAgent('org-acme-1',original.id,'Use the time tool repeatedly');expect(result.status).toBe('FAILED');expect(result.error).toContain('step');expect(generate).toHaveBeenCalledTimes(1);}finally{await db.updateAgent('org-acme-1',original.id,original);}
+});
+test('token quota blocks the provider call before spending',async()=>{
+ const org=(await db.getOrganization('org-acme-1'))!;
+ await db.updateOrganization(org.id,{usedTokensThisMonth:org.monthlyTokenLimit-1,usageMonth:new Date().toISOString().slice(0,7)});
+ const generate=jest.spyOn(AiGatewayClient,'generate');
+ try{const result=await ExecutionEngine.runAgent(org.id,'agent-concierge-1','Explain quota limits');expect(result.status).toBe('FAILED');expect(result.error).toContain('quota');expect(generate).not.toHaveBeenCalled();}finally{await db.updateOrganization(org.id,org);}
+});
+test('daily execution limit blocks new work',async()=>{
+ const org=(await db.getOrganization('org-acme-1'))!;
+ await db.updateOrganization(org.id,{usedExecutionsToday:org.dailyExecutionLimit,usageDay:new Date().toISOString().slice(0,10)});
+ try{await expect(ExecutionEngine.runAgent(org.id,'agent-concierge-1','Explain quotas')).rejects.toThrow('Daily execution quota');}finally{await db.updateOrganization(org.id,org);}
+});

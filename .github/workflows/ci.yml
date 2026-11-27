@@ -84,6 +84,9 @@ jobs:
           cd frontend
           npm ci
 
+      - name: Lint and type check frontend
+        run: npm --prefix frontend run lint && npm --prefix frontend run typecheck
+
       - name: Run Next.js Production Build
         run: |
           cd frontend
@@ -101,3 +104,9 @@ jobs:
         run: |
           cp .env.example .env
           POSTGRES_PASSWORD=ci-only-database-password docker compose config --quiet
+
+      - name: Build backend, gateway and worker image
+        run: docker build -t agentsphere-platform .
+
+      - name: Build frontend image
+        run: docker build -t agentsphere-frontend frontend
