@@ -1,0 +1,135 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "AgentSphere API",
+    "version": "1.0.0",
+    "description": "Enterprise Multi-Tenant AI Agent, Knowledge & Workflow Automation Platform Specification"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:5000/api/v1",
+      "description": "Local Core Backend Service"
+    },
+    {
+      "url": "http://localhost:8000/api/v1",
+      "description": "FastAPI AI Inference & Document Gateway"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  },
+  "paths": {
+    "/auth/login": {
+      "post": {
+        "summary": "Authenticate user session and return scoped JWT token",
+        "tags": ["Authentication"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "string" },
+                  "password": { "type": "string" }
+                },
+                "required": ["email", "password"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Authentication successful" },
+          "401": { "description": "Invalid credentials" }
+        }
+      }
+    },
+    "/auth/me": {
+      "get": {
+        "summary": "Get authenticated user profile and organization partition",
+        "tags": ["Authentication"],
+        "security": [{ "BearerAuth": [] }],
+        "responses": { "200": { "description": "Profile retrieved" } }
+      }
+    },
+    "/agents": {
+      "get": {
+        "summary": "List agents for authenticated tenant organization",
+        "tags": ["Agent Studio"],
+        "security": [{ "BearerAuth": [] }],
+        "responses": { "200": { "description": "Agents list" } }
+      },
+      "post": {
+        "summary": "Create new AI agent",
+        "tags": ["Agent Studio"],
+        "security": [{ "BearerAuth": [] }],
+        "responses": { "201": { "description": "Agent created" } }
+      }
+    },
+    "/agents/{id}/run": {
+      "post": {
+        "summary": "Execute agent with prompt input and tool calling",
+        "tags": ["Agent Studio"],
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "responses": { "200": { "description": "Execution record trace" } }
+      }
+    },
+    "/workflows/{id}/run": {
+      "post": {
+        "summary": "Execute complete visual workflow pipeline",
+        "tags": ["Visual Workflows"],
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "responses": { "200": { "description": "Workflow execution trace" } }
+      }
+    },
+    "/documents/upload": {
+      "post": {
+        "summary": "Upload and index document into pgvector store",
+        "tags": ["Knowledge & RAG"],
+        "security": [{ "BearerAuth": [] }],
+        "responses": { "201": { "description": "Document indexed" } }
+      }
+    },
+    "/documents/search": {
+      "post": {
+        "summary": "Semantic cosine similarity search across tenant chunks",
+        "tags": ["Knowledge & RAG"],
+        "security": [{ "BearerAuth": [] }],
+        "responses": { "200": { "description": "Search matches" } }
+      }
+    },
+    "/approvals/{id}/approve": {
+      "post": {
+        "summary": "Authorize pending execution checkpoint and resume pipeline",
+        "tags": ["Human Approvals"],
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "responses": { "200": { "description": "Execution resumed" } }
+      }
+    },
+    "/billing/usage": {
+      "get": {
+        "summary": "Get organization token limits and consumption telemetry",
+        "tags": ["Usage & Billing"],
+        "security": [{ "BearerAuth": [] }],
+        "responses": { "200": { "description": "Usage limits" } }
+      }
+    },
+    "/admin/provider-health": {
+      "get": {
+        "summary": "Live provider telemetry (Google Gemini SDK and Mock Provider)",
+        "tags": ["Administration"],
+        "security": [{ "BearerAuth": [] }],
+        "responses": { "200": { "description": "Telemetry status" } }
+      }
+    }
+  }
+}

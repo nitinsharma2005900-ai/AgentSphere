@@ -1,0 +1,486 @@
+TECHNICAL SKILLS EVALUATION COHORT  |  PROJECT ASSESSMENT
+AgentSphere  •  Learner Project Brief  •  Page 1
+PROJECT 09
+AgentSphere
+Multi-Tenant AI Agent, Knowledge & Workflow Automation Platform
+AI SaaS / Agent & Workflow Automation
+Assessment level Advanced / Very Difficult
+Mandatory exercises 15 hands-on assessments
+Submission standard Working implementation, tests, documentation, and demonstrable evidence
+Learner Project Scope & Assessment Handbook
+Version 1.0  |  Prepared for Orion LMS
+TECHNICAL SKILLS EVALUATION COHORT  |  PROJECT ASSESSMENT
+AgentSphere  •  Learner Project Brief  •  Page 2
+1. Project Overview
+Build a SaaS platform where organizations configure AI agents, prompts, tools, knowledge sources, workflow steps, 
+model providers, usage limits, and human approval. Protect tenant data and external tool access.
+2. Business Users and Core Modules
+Expected user roles:
+ Organization owner
+ AI builder
+ workflow operator
+ auditor
+ platform administrator
+Core modules to be delivered:
+ Tenant management
+ agent builder
+ prompt versions
+ tool registry
+ knowledge ingestion
+ retrieval
+ execution traces
+ provider gateway
+ usage limits
+ human approval
+ billing simulation.
+3. Learning Outcomes
+ Translate a real business problem into a maintainable software architecture and a set of verifiable requirements.
+ Build a typed, responsive React/Next.js frontend and secure Node.js/Express REST APIs.
+ Design PostgreSQL schemas, constraints, transactions, indexes, and migrations appropriate to the domain.
+ Use Python and FastAPI for a clearly bounded processing, analytics, or integration service.
+ Integrate external services safely using timeouts, retries, authentication, webhook verification, and idempotency.
+ Containerize the system, collaborate through Git/GitHub, and automate quality checks and deployment with GitHub 
+Actions.
+ Prove correctness through unit, API, integration, end-to-end, security, and failure-path tests.
+ Deploy and operate a working application, explain design trade-offs, and respond to production-style incidents.
+4. Required Technology Stack
+Layer Required tools
+Frontend React, Next.js App Router, TypeScript, Tailwind CSS or Material UI
+State and data TanStack Query and/or Redux Toolkit; form validation with a suitable schema library
+Core backend Node.js, Express.js, REST APIs, modular service architecture
+Python service Python 3, FastAPI, Pydantic, pytest
+Database PostgreSQL; ORM/query layer selected and justified by the learner
+Caching and jobs Redis; BullMQ or a suitable Python job mechanism where appropriate
+TECHNICAL SKILLS EVALUATION COHORT  |  PROJECT ASSESSMENT
+AgentSphere  •  Learner Project Brief  •  Page 3
+Authentication JWT/session approach, refresh/revocation, RBAC and resource-level authorization
+Testing Jest or Vitest, React Testing Library, Supertest, pytest, HTTPX, Playwright
+DevOps Git, GitHub, Docker, Docker Compose, GitHub Actions
+API documentation OpenAPI/Swagger and Postman collection
+Hosting A cloud VM or managed hosting environment, DNS, HTTPS, reverse proxy, backups and monitoring
+5. Architecture and Engineering Expectations
+Use a modular architecture. The Next.js application is the user interface; Express is the primary business API; FastAPI is 
+a separate service for the domain-specific processing/analytics responsibility described in the assessments. PostgreSQL 
+is the system of record. Redis may be used for caching and asynchronous jobs.
+ Define service boundaries and document which service owns each data entity. Avoid duplicating authoritative 
+business data across services.
+ Validate all untrusted input on the server. Never rely on frontend-only checks for security or business rules.
+ Use database transactions for operations that must succeed or fail together. Document concurrency-control 
+decisions.
+ Use consistent API response/error formats, pagination, filtering, request IDs, and versioning.
+ Keep secrets out of source control. Commit only a safe .env.example with placeholder values.
+ Make background jobs retry-safe and idempotent. Record failed jobs and provide a controlled recovery path.
+ Include health/readiness endpoints, structured logs, meaningful metrics, and graceful shutdown behavior.
+ Document trade-offs. A technically valid alternative is acceptable when the learner explains why it is appropriate.
+6. Mandatory Hands-on Assessments
+All 15 assessments below are mandatory. Complete each assessment, commit the implementation to the designated 
+GitHub repository, run the required tests, and submit the evidence listed. A partial or mocked implementation must be 
+clearly identified; it must not be presented as a completed production integration.
+Assessment 01 – AI SaaS frontend
+Objective: Build agent builder, prompt editor, workflow canvas or structured builder, knowledge upload, tool 
+configuration, execution trace, and usage dashboards.
+Learner implementation checklist
+ Create the required implementation in the project repository using clear module boundaries and readable naming.
+ Validate inputs and handle expected failures; do not expose stack traces, credentials, or sensitive data to end users.
+ Add automated tests for the main success path, invalid input, authorization or boundary cases, and at least one 
+failure path.
+ Record setup/configuration steps and explain important design decisions in the project documentation.
+Acceptance criteria
+ The feature can be run and demonstrated from the documented setup instructions.
+ The expected business behavior is enforced by the backend/service, not just simulated in the interface.
+ Relevant automated tests pass and test results are included in the submission.
+ The implementation handles invalid input and foreseeable failure conditions with useful, safe errors.
+ The learner can explain the design, demonstrate the feature, and make a small requested change during review.
+Required evidence and deliverables
+ Source code committed to the project GitHub repository with meaningful commit history.
+ Assessment-specific README or documentation describing setup, design, and usage.
+ Automated test files and a captured test run or CI result.
+TECHNICAL SKILLS EVALUATION COHORT  |  PROJECT ASSESSMENT
+AgentSphere  •  Learner Project Brief  •  Page 4
+ Screenshots, short screen recording, API collection, logs, or live URL as appropriate to the assessment.
+Assessment 02 – AI platform backend
+Objective: Implement tenant, agent, prompt version, tool registry, knowledge source, execution, usage, and subscription 
+simulation APIs.
+Learner implementation checklist
+ Create the required implementation in the project repository using clear module boundaries and readable naming.
+ Validate inputs and handle expected failures; do not expose stack traces, credentials, or sensitive data to end users.
+ Add automated tests for the main success path, invalid input, authorization or boundary cases, and at least one 
+failure path.
+ Record setup/configuration steps and explain important design decisions in the project documentation.
+Acceptance criteria
+ The feature can be run and demonstrated from the documented setup instructions.
+ The expected business behavior is enforced by the backend/service, not just simulated in the interface.
+ Relevant automated tests pass and test results are included in the submission.
+ The implementation handles invalid input and foreseeable failure conditions with useful, safe errors.
+ The learner can explain the design, demonstrate the feature, and make a small requested change during review.
+Required evidence and deliverables
+ Source code committed to the project GitHub repository with meaningful commit history.
+ Assessment-specific README or documentation describing setup, design, and usage.
+ Automated test files and a captured test run or CI result.
+ Screenshots, short screen recording, API collection, logs, or live URL as appropriate to the assessment.
+Assessment 03 – AI data architecture
+Objective: Model tenants, agents, prompt versions, tool permissions, documents, chunks, executions, token usage, 
+approval events, and audit records.
+Learner implementation checklist
+ Create the required implementation in the project repository using clear module boundaries and readable naming.
+ Consider concurrency, duplicate requests/events, transaction boundaries, and safe retry behavior where relevant.
+ Validate inputs and handle expected failures; do not expose stack traces, credentials, or sensitive data to end users.
+ Add automated tests for the main success path, invalid input, authorization or boundary cases, and at least one 
+failure path.
+ Record setup/configuration steps and explain important design decisions in the project documentation.
+Acceptance criteria
+ The feature can be run and demonstrated from the documented setup instructions.
+ The expected business behavior is enforced by the backend/service, not just simulated in the interface.
+ Relevant automated tests pass and test results are included in the submission.
+ The implementation handles invalid input and foreseeable failure conditions with useful, safe errors.
+ The learner can explain the design, demonstrate the feature, and make a small requested change during review.
+Required evidence and deliverables
+ Source code committed to the project GitHub repository with meaningful commit history.
+ Assessment-specific README or documentation describing setup, design, and usage.
+ Automated test files and a captured test run or CI result.
+ Screenshots, short screen recording, API collection, logs, or live URL as appropriate to the assessment.
+TECHNICAL SKILLS EVALUATION COHORT  |  PROJECT ASSESSMENT
+AgentSphere  •  Learner Project Brief  •  Page 5
+Assessment 04 – AI platform security
+Objective: Implement tenant isolation, encrypted secret storage, scoped API keys, tool allowlists, prompt-injection 
+defenses, and output handling safeguards.
+Learner implementation checklist
+ Create the required implementation in the project repository using clear module boundaries and readable naming.
+ Consider concurrency, duplicate requests/events, transaction boundaries, and safe retry behavior where relevant.
+ Validate inputs and handle expected failures; do not expose stack traces, credentials, or sensitive data to end users.
+ Add automated tests for the main success path, invalid input, authorization or boundary cases, and at least one 
+failure path.
+ Record setup/configuration steps and explain important design decisions in the project documentation.
+Acceptance criteria
+ The feature can be run and demonstrated from the documented setup instructions.
+ The expected business behavior is enforced by the backend/service, not just simulated in the interface.
+ Relevant automated tests pass and test results are included in the submission.
+ The implementation handles invalid input and foreseeable failure conditions with useful, safe errors.
+ The learner can explain the design, demonstrate the feature, and make a small requested change during review.
+Required evidence and deliverables
+ Source code committed to the project GitHub repository with meaningful commit history.
+ Assessment-specific README or documentation describing setup, design, and usage.
+ Automated test files and a captured test run or CI result.
+ Screenshots, short screen recording, API collection, logs, or live URL as appropriate to the assessment.
+Assessment 05 – Python document pipeline
+Objective: Implement file validation, text extraction, chunking, metadata, embedding interface, ingestion status, and 
+repeatable re-indexing for supported formats.
+Learner implementation checklist
+ Create the required implementation in the project repository using clear module boundaries and readable naming.
+ Include sample input/output, data validation, error handling, and a small performance or correctness benchmark.
+ Validate inputs and handle expected failures; do not expose stack traces, credentials, or sensitive data to end users.
+ Add automated tests for the main success path, invalid input, authorization or boundary cases, and at least one 
+failure path.
+ Record setup/configuration steps and explain important design decisions in the project documentation.
+Acceptance criteria
+ The feature can be run and demonstrated from the documented setup instructions.
+ The expected business behavior is enforced by the backend/service, not just simulated in the interface.
+ Relevant automated tests pass and test results are included in the submission.
+ The implementation handles invalid input and foreseeable failure conditions with useful, safe errors.
+ The learner can explain the design, demonstrate the feature, and make a small requested change during review.
+Required evidence and deliverables
+ Source code committed to the project GitHub repository with meaningful commit history.
+ Assessment-specific README or documentation describing setup, design, and usage.
+ Automated test files and a captured test run or CI result.
+ Screenshots, short screen recording, API collection, logs, or live URL as appropriate to the assessment.
+TECHNICAL SKILLS EVALUATION COHORT  |  PROJECT ASSESSMENT
+AgentSphere  •  Learner Project Brief  •  Page 6
+Assessment 06 – FastAPI model gateway
+Objective: Build provider abstraction, request validation, streaming, timeout/retry policy, fallback, usage measurement, 
+and provider health endpoints.
+Learner implementation checklist
+ Create the required implementation in the project repository using clear module boundaries and readable naming.
+ Include sample input/output, data validation, error handling, and a small performance or correctness benchmark.
+ Validate inputs and handle expected failures; do not expose stack traces, credentials, or sensitive data to end users.
+ Add automated tests for the main success path, invalid input, authorization or boundary cases, and at least one 
+failure path.
+ Record setup/configuration steps and explain important design decisions in the project documentation.
+Acceptance criteria
+ The feature can be run and demonstrated from the documented setup instructions.
+ The expected business behavior is enforced by the backend/service, not just simulated in the interface.
+ Relevant automated tests pass and test results are included in the submission.
+ The implementation handles invalid input and foreseeable failure conditions with useful, safe errors.
+ The learner can explain the design, demonstrate the feature, and make a small requested change during review.
+Required evidence and deliverables
+ Source code committed to the project GitHub repository with meaningful commit history.
+ Assessment-specific README or documentation describing setup, design, and usage.
+ Automated test files and a captured test run or CI result.
+ Screenshots, short screen recording, API collection, logs, or live URL as appropriate to the assessment.
+Assessment 07 – Agent orchestration engine
+Objective: Implement bounded multi-step execution, persisted state, tool calling, approval pauses, timeouts, 
+cancellation, and idempotent tool actions.
+Learner implementation checklist
+ Create the required implementation in the project repository using clear module boundaries and readable naming.
+ Consider concurrency, duplicate requests/events, transaction boundaries, and safe retry behavior where relevant.
+ Validate inputs and handle expected failures; do not expose stack traces, credentials, or sensitive data to end users.
+ Add automated tests for the main success path, invalid input, authorization or boundary cases, and at least one 
+failure path.
+ Record setup/configuration steps and explain important design decisions in the project documentation.
+Acceptance criteria
+ The feature can be run and demonstrated from the documented setup instructions.
+ The expected business behavior is enforced by the backend/service, not just simulated in the interface.
+ Relevant automated tests pass and test results are included in the submission.
+ The implementation handles invalid input and foreseeable failure conditions with useful, safe errors.
+ The learner can explain the design, demonstrate the feature, and make a small requested change during review.
+Required evidence and deliverables
+ Source code committed to the project GitHub repository with meaningful commit history.
+ Assessment-specific README or documentation describing setup, design, and usage.
+ Automated test files and a captured test run or CI result.
+ Screenshots, short screen recording, API collection, logs, or live URL as appropriate to the assessment.
+TECHNICAL SKILLS EVALUATION COHORT  |  PROJECT ASSESSMENT
+AgentSphere  •  Learner Project Brief  •  Page 7
+Assessment 08 – AI provider integrations
+Objective: Integrate at least one model provider and a second mock/provider adapter, plus vector storage and external 
+tool APIs. Keep keys out of source control.
+Learner implementation checklist
+ Create the required implementation in the project repository using clear module boundaries and readable naming.
+ Consider concurrency, duplicate requests/events, transaction boundaries, and safe retry behavior where relevant.
+ Validate inputs and handle expected failures; do not expose stack traces, credentials, or sensitive data to end users.
+ Add automated tests for the main success path, invalid input, authorization or boundary cases, and at least one 
+failure path.
+ Record setup/configuration steps and explain important design decisions in the project documentation.
+Acceptance criteria
+ The feature can be run and demonstrated from the documented setup instructions.
+ The expected business behavior is enforced by the backend/service, not just simulated in the interface.
+ Relevant automated tests pass and test results are included in the submission.
+ The implementation handles invalid input and foreseeable failure conditions with useful, safe errors.
+ The learner can explain the design, demonstrate the feature, and make a small requested change during review.
+Required evidence and deliverables
+ Source code committed to the project GitHub repository with meaningful commit history.
+ Assessment-specific README or documentation describing setup, design, and usage.
+ Automated test files and a captured test run or CI result.
+ Screenshots, short screen recording, API collection, logs, or live URL as appropriate to the assessment.
+Assessment 09 – Docker AI infrastructure
+Objective: Containerize frontend, core API, inference gateway, workers, PostgreSQL, Redis, and vector service with 
+resource limits and health checks.
+Learner implementation checklist
+ Create the required implementation in the project repository using clear module boundaries and readable naming.
+ Demonstrate reproducible configuration across local, staging, and production-like environments without committing 
+secrets.
+ Validate inputs and handle expected failures; do not expose stack traces, credentials, or sensitive data to end users.
+ Add automated tests for the main success path, invalid input, authorization or boundary cases, and at least one 
+failure path.
+ Record setup/configuration steps and explain important design decisions in the project documentation.
+Acceptance criteria
+ The feature can be run and demonstrated from the documented setup instructions.
+ The expected business behavior is enforced by the backend/service, not just simulated in the interface.
+ Relevant automated tests pass and test results are included in the submission.
+ The implementation handles invalid input and foreseeable failure conditions with useful, safe errors.
+ The learner can explain the design, demonstrate the feature, and make a small requested change during review.
+Required evidence and deliverables
+ Source code committed to the project GitHub repository with meaningful commit history.
+ Assessment-specific README or documentation describing setup, design, and usage.
+ Automated test files and a captured test run or CI result.
+TECHNICAL SKILLS EVALUATION COHORT  |  PROJECT ASSESSMENT
+AgentSphere  •  Learner Project Brief  •  Page 8
+ Screenshots, short screen recording, API collection, logs, or live URL as appropriate to the assessment.
+Assessment 10 – Git and prompt version governance
+Objective: Version prompts and tool schemas, review behavior-changing updates, protect branches, and record 
+reproducible release versions.
+Learner implementation checklist
+ Create the required implementation in the project repository using clear module boundaries and readable naming.
+ Validate inputs and handle expected failures; do not expose stack traces, credentials, or sensitive data to end users.
+ Add automated tests for the main success path, invalid input, authorization or boundary cases, and at least one 
+failure path.
+ Record setup/configuration steps and explain important design decisions in the project documentation.
+Acceptance criteria
+ The feature can be run and demonstrated from the documented setup instructions.
+ The expected business behavior is enforced by the backend/service, not just simulated in the interface.
+ Relevant automated tests pass and test results are included in the submission.
+ The implementation handles invalid input and foreseeable failure conditions with useful, safe errors.
+ The learner can explain the design, demonstrate the feature, and make a small requested change during review.
+Required evidence and deliverables
+ Source code committed to the project GitHub repository with meaningful commit history.
+ Assessment-specific README or documentation describing setup, design, and usage.
+ Automated test files and a captured test run or CI result.
+ Screenshots, short screen recording, API collection, logs, or live URL as appropriate to the assessment.
+Assessment 11 – AI CI/CD and evaluations
+Objective: Automate code tests, security scanning, Docker builds, prompt regression datasets, output schema checks, 
+and deployment approvals.
+Learner implementation checklist
+ Create the required implementation in the project repository using clear module boundaries and readable naming.
+ Demonstrate reproducible configuration across local, staging, and production-like environments without committing 
+secrets.
+ Validate inputs and handle expected failures; do not expose stack traces, credentials, or sensitive data to end users.
+ Add automated tests for the main success path, invalid input, authorization or boundary cases, and at least one 
+failure path.
+ Record setup/configuration steps and explain important design decisions in the project documentation.
+Acceptance criteria
+ The feature can be run and demonstrated from the documented setup instructions.
+ The expected business behavior is enforced by the backend/service, not just simulated in the interface.
+ Relevant automated tests pass and test results are included in the submission.
+ The implementation handles invalid input and foreseeable failure conditions with useful, safe errors.
+ The learner can explain the design, demonstrate the feature, and make a small requested change during review.
+Required evidence and deliverables
+ Source code committed to the project GitHub repository with meaningful commit history.
+ Assessment-specific README or documentation describing setup, design, and usage.
+ Automated test files and a captured test run or CI result.
+TECHNICAL SKILLS EVALUATION COHORT  |  PROJECT ASSESSMENT
+AgentSphere  •  Learner Project Brief  •  Page 9
+ Screenshots, short screen recording, API collection, logs, or live URL as appropriate to the assessment.
+Assessment 12 – AI safety and reliability testing
+Objective: Test prompt injection, tenant isolation, unauthorized tools, malformed model output, provider outage, infinite 
+loops, cost limits, and retries.
+Learner implementation checklist
+ Create the required implementation in the project repository using clear module boundaries and readable naming.
+ Consider concurrency, duplicate requests/events, transaction boundaries, and safe retry behavior where relevant.
+ Validate inputs and handle expected failures; do not expose stack traces, credentials, or sensitive data to end users.
+ Add automated tests for the main success path, invalid input, authorization or boundary cases, and at least one 
+failure path.
+ Record setup/configuration steps and explain important design decisions in the project documentation.
+Acceptance criteria
+ The feature can be run and demonstrated from the documented setup instructions.
+ The expected business behavior is enforced by the backend/service, not just simulated in the interface.
+ Relevant automated tests pass and test results are included in the submission.
+ The implementation handles invalid input and foreseeable failure conditions with useful, safe errors.
+ The learner can explain the design, demonstrate the feature, and make a small requested change during review.
+Required evidence and deliverables
+ Source code committed to the project GitHub repository with meaningful commit history.
+ Assessment-specific README or documentation describing setup, design, and usage.
+ Automated test files and a captured test run or CI result.
+ Screenshots, short screen recording, API collection, logs, or live URL as appropriate to the assessment.
+Assessment 13 – AI API documentation
+Objective: Document agent execution, streaming, tool schema, knowledge ingestion, approvals, provider configuration, 
+and usage endpoints.
+Learner implementation checklist
+ Create the required implementation in the project repository using clear module boundaries and readable naming.
+ Validate inputs and handle expected failures; do not expose stack traces, credentials, or sensitive data to end users.
+ Add automated tests for the main success path, invalid input, authorization or boundary cases, and at least one 
+failure path.
+ Record setup/configuration steps and explain important design decisions in the project documentation.
+Acceptance criteria
+ The feature can be run and demonstrated from the documented setup instructions.
+ The expected business behavior is enforced by the backend/service, not just simulated in the interface.
+ Relevant automated tests pass and test results are included in the submission.
+ The implementation handles invalid input and foreseeable failure conditions with useful, safe errors.
+ The learner can explain the design, demonstrate the feature, and make a small requested change during review.
+Required evidence and deliverables
+ Source code committed to the project GitHub repository with meaningful commit history.
+ Assessment-specific README or documentation describing setup, design, and usage.
+ Automated test files and a captured test run or CI result.
+ Screenshots, short screen recording, API collection, logs, or live URL as appropriate to the assessment.
+TECHNICAL SKILLS EVALUATION COHORT  |  PROJECT ASSESSMENT
+AgentSphere  •  Learner Project Brief  •  Page 10
+Assessment 14 – AI SaaS deployment
+Objective: Deploy with secret management, tenant isolation, usage quotas, monitoring, provider configuration, and 
+operational cost controls.
+Learner implementation checklist
+ Create the required implementation in the project repository using clear module boundaries and readable naming.
+ Demonstrate reproducible configuration across local, staging, and production-like environments without committing 
+secrets.
+ Validate inputs and handle expected failures; do not expose stack traces, credentials, or sensitive data to end users.
+ Add automated tests for the main success path, invalid input, authorization or boundary cases, and at least one 
+failure path.
+ Record setup/configuration steps and explain important design decisions in the project documentation.
+Acceptance criteria
+ The feature can be run and demonstrated from the documented setup instructions.
+ The expected business behavior is enforced by the backend/service, not just simulated in the interface.
+ Relevant automated tests pass and test results are included in the submission.
+ The implementation handles invalid input and foreseeable failure conditions with useful, safe errors.
+ The learner can explain the design, demonstrate the feature, and make a small requested change during review.
+Required evidence and deliverables
+ Source code committed to the project GitHub repository with meaningful commit history.
+ Assessment-specific README or documentation describing setup, design, and usage.
+ Automated test files and a captured test run or CI result.
+ Screenshots, short screen recording, API collection, logs, or live URL as appropriate to the assessment.
+Assessment 15 – AI incident simulation
+Objective: Investigate token-cost spikes, runaway agent loops, provider outage, cross-tenant retrieval, and incorrect tool 
+execution. Provide RCA and prevention.
+Learner implementation checklist
+ Create the required implementation in the project repository using clear module boundaries and readable naming.
+ Consider concurrency, duplicate requests/events, transaction boundaries, and safe retry behavior where relevant.
+ Validate inputs and handle expected failures; do not expose stack traces, credentials, or sensitive data to end users.
+ Add automated tests for the main success path, invalid input, authorization or boundary cases, and at least one 
+failure path.
+ Record setup/configuration steps and explain important design decisions in the project documentation.
+Acceptance criteria
+ The feature can be run and demonstrated from the documented setup instructions.
+ The expected business behavior is enforced by the backend/service, not just simulated in the interface.
+ Relevant automated tests pass and test results are included in the submission.
+ The implementation handles invalid input and foreseeable failure conditions with useful, safe errors.
+ The learner can explain the design, demonstrate the feature, and make a small requested change during review.
+Required evidence and deliverables
+ Source code committed to the project GitHub repository with meaningful commit history.
+ Assessment-specific README or documentation describing setup, design, and usage.
+ Automated test files and a captured test run or CI result.
+TECHNICAL SKILLS EVALUATION COHORT  |  PROJECT ASSESSMENT
+AgentSphere  •  Learner Project Brief  •  Page 11
+ Screenshots, short screen recording, API collection, logs, or live URL as appropriate to the assessment.
+Domain-specific challenge: An agent must never read another tenant's knowledge, call an unauthorized tool, expose 
+secrets, or exceed configured execution and spending limits. Treat model output as untrusted.
+7. Domain-Specific Capstone Challenge
+An agent must never read another tenant's knowledge, call an unauthorized tool, expose secrets, or exceed configured 
+execution and spending limits. Treat model output as untrusted.
+The evaluator may introduce a controlled failure or edge case. The learner must reproduce the issue, inspect logs and 
+data, identify the root cause, implement a fix, add a regression test, and explain how recurrence will be prevented.
+8. Cross-Cutting Non-Functional Requirements
+Security: Enforce authorization server-side; validate input; protect secrets; use HTTPS in deployed environments; apply 
+least privilege; avoid exposing sensitive records in logs.
+Reliability: Handle timeouts, retries, duplicate events, process restarts, and dependency outages. Do not retry non-
+idempotent actions blindly.
+Performance: Paginate large collections, index measured query patterns, avoid N+1 access, and provide evidence for 
+significant optimization claims.
+Accessibility and usability: Use semantic controls, keyboard navigation, visible validation, loading/empty/error states, 
+and responsive layouts.
+Maintainability: Use clear modules, typed contracts, linting/formatting, meaningful names, migration discipline, and 
+documented configuration.
+Observability: Use structured logs, correlation/request IDs, health checks, actionable error reporting, and basic metrics.
+Data integrity: Use constraints, transactions, explicit state transitions, audit history for important changes, and 
+backup/restore validation.
+9. Submission Package
+ GitHub repository URL with source code and commit history.
+ Live application URL and API base URL, where deployment is required.
+ README containing prerequisites, environment setup, migrations, seed data, local run, test, and deployment 
+commands.
+ Architecture diagram, database ER diagram, and service/data-flow diagram.
+ OpenAPI/Swagger specification and Postman collection.
+ Automated test suites and coverage/test execution report.
+ Dockerfiles and Docker Compose configuration.
+ GitHub Actions workflow files and CI/CD run evidence.
+ Deployment notes, domain/HTTPS evidence, backup and restore evidence.
+ Short demo recording or scheduled live demonstration, plus known limitations.
+10. Evaluation and Scoring
+Each assessment is scored out of 100 points using the same dimensions below. The complete project is scored out of 
+1,500 points. Evaluators should record evidence and feedback for every assessment; a high total does not automatically 
+waive a critical security or data-integrity failure.
+TECHNICAL SKILLS EVALUATION COHORT  |  PROJECT ASSESSMENT
+AgentSphere  •  Learner Project Brief  •  Page 12
+Dimension Points per assessment
+Functional correctness 30 points
+Architecture and technical implementation 25 points
+Code quality and maintainability 15 points
+Testing and error handling 15 points
+Documentation and demonstration 15 points
+Total: 100 points per assessment × 15 assessments = 1,500 points per project.
+Suggested performance bands
+Score Interpretation
+90–100% Exceptional
+80–89% Strong
+70–79% Competent
+60–69% Needs improvement
+Below 60% Does not yet meet expectations
+11. Live Technical Review
+ The learner must explain the architecture and trace one important user journey from browser to database and back.
+ The evaluator may ask the learner to change a requirement, add a test, debug a defect, or explain a query/API 
+decision.
+ The learner must distinguish completed features from mocks, stubs, and known limitations.
+ The learner may use AI coding assistants if cohort policy permits, but remains responsible for correctness, security, 
+licensing, and explaining every submitted component.
+ Do not submit secrets, real patient records, real financial credentials, or personal data. Use synthetic data and 
+sandbox services.
+12. Learner Completion Checklist
+  I have completed all 15 assessments and can demonstrate each one.
+  My repository contains meaningful commits and no secrets.
+  My application can be installed and run using the documented steps.
+  My automated tests pass and cover important success and failure cases.
+  My API documentation and architecture diagrams match the implementation.
+  My deployed application uses HTTPS and does not expose the database publicly.
+  I have documented limitations, assumptions, and third-party services that are mocked.
+  I am prepared to explain and modify my implementation during a live review.
+13. Assumptions and Responsible Use
+This is an educational engineering assessment, not a certification of legal, financial, medical, or regulatory compliance. 
+Use synthetic data and sandbox integrations. Do not process real payments, medical records, payroll, insurance claims, 
+or identity documents. Any real-world deployment requires domain-specific security, privacy, legal, and compliance 
+review.
+A learner may choose an equivalent technology or hosting provider only with evaluator approval and a written 
+explanation showing that all learning outcomes and acceptance criteria remain satisfied.

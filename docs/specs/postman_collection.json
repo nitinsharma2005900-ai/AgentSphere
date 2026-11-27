@@ -1,0 +1,97 @@
+{
+  "info": {
+    "name": "AgentSphere Platform API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Auth - Login (Owner)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"owner@agentsphere.ai\",\n  \"password\": \"Password123!\"\n}"
+        },
+        "url": { "raw": "http://localhost:5000/api/v1/auth/login", "protocol": "http", "host": ["localhost"], "port": "5000", "path": ["api", "v1", "auth", "login"] }
+      }
+    },
+    {
+      "name": "Agents - List All",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+        "url": { "raw": "http://localhost:5000/api/v1/agents", "protocol": "http", "host": ["localhost"], "port": "5000", "path": ["api", "v1", "agents"] }
+      }
+    },
+    {
+      "name": "Agents - Run Execution",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{token}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"prompt\": \"Please calculate 5000 * 1.18 for vendor invoice reconciliation\"\n}"
+        },
+        "url": { "raw": "http://localhost:5000/api/v1/agents/agent-financial-2/run", "protocol": "http", "host": ["localhost"], "port": "5000", "path": ["api", "v1", "agents", "agent-financial-2", "run"] }
+      }
+    },
+    {
+      "name": "Workflows - Execute Pipeline",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{token}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"inputData\": {\n    \"invoiceId\": \"INV-9901\",\n    \"amount\": 6400.0\n  }\n}"
+        },
+        "url": { "raw": "http://localhost:5000/api/v1/workflows/wf-invoice-1/run", "protocol": "http", "host": ["localhost"], "port": "5000", "path": ["api", "v1", "workflows", "wf-invoice-1", "run"] }
+      }
+    },
+    {
+      "name": "Approvals - List Pending",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+        "url": { "raw": "http://localhost:5000/api/v1/approvals", "protocol": "http", "host": ["localhost"], "port": "5000", "path": ["api", "v1", "approvals"] }
+      }
+    },
+    {
+      "name": "Knowledge - Semantic Search",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{token}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"query\": \"executive travel policy and rates\",\n  \"top_k\": 4\n}"
+        },
+        "url": { "raw": "http://localhost:5000/api/v1/documents/search", "protocol": "http", "host": ["localhost"], "port": "5000", "path": ["api", "v1", "documents", "search"] }
+      }
+    },
+    {
+      "name": "Billing - Usage Telemetry",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+        "url": { "raw": "http://localhost:5000/api/v1/billing/usage", "protocol": "http", "host": ["localhost"], "port": "5000", "path": ["api", "v1", "billing", "usage"] }
+      }
+    },
+    {
+      "name": "Admin - Provider Health",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+        "url": { "raw": "http://localhost:5000/api/v1/admin/provider-health", "protocol": "http", "host": ["localhost"], "port": "5000", "path": ["api", "v1", "admin", "provider-health"] }
+      }
+    }
+  ]
+}
