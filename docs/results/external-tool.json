@@ -3,7 +3,7 @@
   "passed": false,
   "body": {
     "error": "Service Error",
-    "message": "Service operation failed. Check health and retry.",
-    "correlationId": "5c1d7609-61fb-4128-bcb9-301c691c12a5"
+    "message": "External tool returned HTTP 429; redirects are prohibited",
+    "correlationId": "56f496b7-9667-4708-9b48-fba6e535f18e"
   }
 }

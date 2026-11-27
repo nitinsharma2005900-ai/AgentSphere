@@ -1,0 +1,47 @@
+{
+  "frontend": "https://agentsphere-zeta.vercel.app",
+  "backend": "https://agentsphere-api-nitinsharma.onrender.com",
+  "application_commit": "81517b0",
+  "checks": {
+    "/health": {
+      "status": 200,
+      "response": {
+        "status": "healthy",
+        "service": "AgentSphere Core API",
+        "version": "1.1.0",
+        "database": "postgresql",
+        "timestamp": "2026-11-27T14:43:54.297Z"
+      }
+    },
+    "/ready": {
+      "status": 200,
+      "response": {
+        "database": "healthy",
+        "redis": {
+          "status": "healthy",
+          "counts": {
+            "waiting": 0,
+            "active": 0,
+            "failed": 0
+          }
+        }
+      }
+    },
+    "frontend": {
+      "status": 200,
+      "title_present": true
+    },
+    "login": {
+      "status": 200
+    },
+    "external_tool": {
+      "status": 502,
+      "passed": false,
+      "body": {
+        "error": "Service Error",
+        "message": "External tool returned HTTP 429; redirects are prohibited",
+        "correlationId": "56f496b7-9667-4708-9b48-fba6e535f18e"
+      }
+    }
+  }
+}

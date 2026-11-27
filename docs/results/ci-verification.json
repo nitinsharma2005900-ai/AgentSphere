@@ -1,0 +1,339 @@
+{
+  "conclusion": "success",
+  "jobs": [
+    {
+      "completedAt": "2026-11-27T14:41:38Z",
+      "conclusion": "success",
+      "databaseId": 140570400994,
+      "name": "Node.js Backend, RBAC & Tenant Isolation Tests",
+      "startedAt": "2026-11-27T14:41:06Z",
+      "status": "completed",
+      "steps": [
+        {
+          "completedAt": "2026-11-27T14:41:07Z",
+          "conclusion": "success",
+          "name": "Set up job",
+          "number": 1,
+          "startedAt": "2026-11-27T14:41:07Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-27T14:41:09Z",
+          "conclusion": "success",
+          "name": "Checkout Source Code",
+          "number": 2,
+          "startedAt": "2026-11-27T14:41:07Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-27T14:41:12Z",
+          "conclusion": "success",
+          "name": "Setup Node.js 22",
+          "number": 3,
+          "startedAt": "2026-11-27T14:41:09Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-27T14:41:17Z",
+          "conclusion": "success",
+          "name": "Install Backend Dependencies",
+          "number": 4,
+          "startedAt": "2026-11-27T14:41:12Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-27T14:41:18Z",
+          "conclusion": "success",
+          "name": "Audit backend production dependencies",
+          "number": 5,
+          "startedAt": "2026-11-27T14:41:17Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-27T14:41:24Z",
+          "conclusion": "success",
+          "name": "Run TypeScript Compile Check",
+          "number": 6,
+          "startedAt": "2026-11-27T14:41:18Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-27T14:41:34Z",
+          "conclusion": "success",
+          "name": "Run Backend Integration & Negative Multi-Tenant Isolation Tests",
+          "number": 7,
+          "startedAt": "2026-11-27T14:41:24Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-27T14:41:35Z",
+          "conclusion": "success",
+          "name": "Post Setup Node.js 22",
+          "number": 13,
+          "startedAt": "2026-11-27T14:41:34Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-27T14:41:35Z",
+          "conclusion": "success",
+          "name": "Post Checkout Source Code",
+          "number": 14,
+          "startedAt": "2026-11-27T14:41:35Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-27T14:41:35Z",
+          "conclusion": "success",
+          "name": "Complete job",
+          "number": 15,
+          "startedAt": "2026-11-27T14:41:35Z",
+          "status": "completed"
+        }
+      ],
+      "url": "https://github.com/nitinsharma2005900-ai/AgentSphere/actions/runs/46018118155/job/140570400994"
+    },
+    {
+      "completedAt": "2026-11-27T14:42:23Z",
+      "conclusion": "success",
+      "databaseId": 140570401016,
+      "name": "Next.js Frontend Production Build & Lint",
+      "startedAt": "2026-11-27T14:41:06Z",
+      "status": "completed",
+      "steps": [
+        {
+          "completedAt": "2026-11-27T14:41:07Z",
+          "conclusion": "success",
+          "name": "Set up job",
+          "number": 1,
+          "startedAt": "2026-11-27T14:41:07Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-27T14:41:09Z",
+          "conclusion": "success",
+          "name": "Checkout Source Code",
+          "number": 2,
+          "startedAt": "2026-11-27T14:41:07Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-27T14:41:13Z",
+          "conclusion": "success",
+          "name": "Setup Node.js 22",
+          "number": 3,
+          "startedAt": "2026-11-27T14:41:09Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-27T14:41:22Z",
+          "conclusion": "success",
+          "name": "Install Frontend Dependencies",
+          "number": 4,
+          "startedAt": "2026-11-27T14:41:13Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-27T14:41:23Z",
+          "conclusion": "success",
+          "name": "Audit frontend production dependencies",
+          "number": 5,
+          "startedAt": "2026-11-27T14:41:22Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-27T14:41:37Z",
+          "conclusion": "success",
+          "name": "Lint and type check frontend",
+          "number": 6,
+          "startedAt": "2026-11-27T14:41:23Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-27T14:42:20Z",
+          "conclusion": "success",
+          "name": "Run Next.js Production Build",
+          "number": 7,
+          "startedAt": "2026-11-27T14:41:37Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-27T14:42:20Z",
+          "conclusion": "success",
+          "name": "Post Setup Node.js 22",
+          "number": 13,
+          "startedAt": "2026-11-27T14:42:20Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-27T14:42:20Z",
+          "conclusion": "success",
+          "name": "Post Checkout Source Code",
+          "number": 14,
+          "startedAt": "2026-11-27T14:42:20Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-27T14:42:20Z",
+          "conclusion": "success",
+          "name": "Complete job",
+          "number": 15,
+          "startedAt": "2026-11-27T14:42:20Z",
+          "status": "completed"
+        }
+      ],
+      "url": "https://github.com/nitinsharma2005900-ai/AgentSphere/actions/runs/46018118155/job/140570401016"
+    },
+    {
+      "completedAt": "2026-11-27T14:41:24Z",
+      "conclusion": "success",
+      "databaseId": 140570401122,
+      "name": "Python AI Gateway, Safety Guardrails & Evaluations",
+      "startedAt": "2026-11-27T14:41:05Z",
+      "status": "completed",
+      "steps": [
+        {
+          "completedAt": "2026-11-27T14:41:06Z",
+          "conclusion": "success",
+          "name": "Set up job",
+          "number": 1,
+          "startedAt": "2026-11-27T14:41:06Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-27T14:41:07Z",
+          "conclusion": "success",
+          "name": "Checkout Source Code",
+          "number": 2,
+          "startedAt": "2026-11-27T14:41:06Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-27T14:41:09Z",
+          "conclusion": "success",
+          "name": "Setup Python 3.13",
+          "number": 3,
+          "startedAt": "2026-11-27T14:41:07Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-27T14:41:19Z",
+          "conclusion": "success",
+          "name": "Install AI Dependencies",
+          "number": 4,
+          "startedAt": "2026-11-27T14:41:09Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-27T14:41:21Z",
+          "conclusion": "success",
+          "name": "Run Pytest AI Gateway Suite",
+          "number": 5,
+          "startedAt": "2026-11-27T14:41:19Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-27T14:41:22Z",
+          "conclusion": "success",
+          "name": "Run AI Safety & Injection Defenses Evaluation",
+          "number": 6,
+          "startedAt": "2026-11-27T14:41:21Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-27T14:41:22Z",
+          "conclusion": "success",
+          "name": "Post Setup Python 3.13",
+          "number": 11,
+          "startedAt": "2026-11-27T14:41:22Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-27T14:41:23Z",
+          "conclusion": "success",
+          "name": "Post Checkout Source Code",
+          "number": 12,
+          "startedAt": "2026-11-27T14:41:22Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-27T14:41:23Z",
+          "conclusion": "success",
+          "name": "Complete job",
+          "number": 13,
+          "startedAt": "2026-11-27T14:41:23Z",
+          "status": "completed"
+        }
+      ],
+      "url": "https://github.com/nitinsharma2005900-ai/AgentSphere/actions/runs/46018118155/job/140570401122"
+    },
+    {
+      "completedAt": "2026-11-27T14:44:55Z",
+      "conclusion": "success",
+      "databaseId": 140571069308,
+      "name": "Docker AI Infrastructure Validation",
+      "startedAt": "2026-11-27T14:42:25Z",
+      "status": "completed",
+      "steps": [
+        {
+          "completedAt": "2026-11-27T14:42:26Z",
+          "conclusion": "success",
+          "name": "Set up job",
+          "number": 1,
+          "startedAt": "2026-11-27T14:42:26Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-27T14:42:28Z",
+          "conclusion": "success",
+          "name": "Checkout Source Code",
+          "number": 2,
+          "startedAt": "2026-11-27T14:42:26Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-27T14:42:28Z",
+          "conclusion": "success",
+          "name": "Validate Docker Compose Configuration",
+          "number": 3,
+          "startedAt": "2026-11-27T14:42:28Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-27T14:43:28Z",
+          "conclusion": "success",
+          "name": "Build backend, gateway and worker image",
+          "number": 4,
+          "startedAt": "2026-11-27T14:42:28Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-27T14:44:52Z",
+          "conclusion": "success",
+          "name": "Build frontend image",
+          "number": 5,
+          "startedAt": "2026-11-27T14:43:28Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-27T14:44:52Z",
+          "conclusion": "success",
+          "name": "Post Checkout Source Code",
+          "number": 10,
+          "startedAt": "2026-11-27T14:44:52Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-11-27T14:44:52Z",
+          "conclusion": "success",
+          "name": "Complete job",
+          "number": 11,
+          "startedAt": "2026-11-27T14:44:52Z",
+          "status": "completed"
+        }
+      ],
+      "url": "https://github.com/nitinsharma2005900-ai/AgentSphere/actions/runs/46018118155/job/140571069308"
+    }
+  ],
+  "status": "completed",
+  "url": "https://github.com/nitinsharma2005900-ai/AgentSphere/actions/runs/46018118155"
+}

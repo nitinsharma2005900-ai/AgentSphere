@@ -6,6 +6,7 @@ A multi-tenant agent, knowledge retrieval, and approval-workflow platform. Exist
 - Live frontend: https://agentsphere-zeta.vercel.app
 - API: https://agentsphere-api-nitinsharma.onrender.com/api/v1
 - Health/readiness: backend host /health and /ready
+- Verified CI run: https://github.com/nitinsharma2005900-ai/AgentSphere/actions/runs/46018118155
 - Evidence: docs/results; API specifications: docs/specs
 - Updated documentation: AgentSphere_Project_Documentation.pdf
 
@@ -92,7 +93,7 @@ The Render service deploys manually after reviewed changes. GitHub Actions runs 
 - No email provider is configured for forgotten-password delivery. The UI reports this honestly; authenticated password changes work.
 - The deployed embedding mode is lexical feature hashing; semantic embeddings require explicit configuration and re-indexing.
 - The gateway supports streaming and structured-output validation, but a live streamed UI/model journey is not part of the verified browser evidence.
-- The public weather API succeeded locally but returned an upstream error from the hosted service; external provider availability is not guaranteed.
+- The public weather API succeeded locally but returned HTTP 429 from the hosted service; external provider availability is not guaranteed.
 - Multi-step model responses can time out. A real calculator call followed by a provider timeout is recorded in live-tool-calling.json.
 - Browser checks cover major journeys, not exhaustive permutations of every UI control or file format.
 - Free hosting has cold starts and shared worker resources; no paid availability or monitoring service is provisioned.
