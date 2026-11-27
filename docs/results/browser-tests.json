@@ -60,13 +60,13 @@
   },
   "suites": [
     {
-      "title": "deployed.spec.ts",
-      "file": "deployed.spec.ts",
+      "title": "functions.spec.ts",
+      "file": "functions.spec.ts",
       "column": 0,
       "line": 0,
       "specs": [
         {
-          "title": "deployed workspace navigation, dialogs, export, and mobile controls",
+          "title": "workflow builder saves and runs a real tool pipeline",
           "ok": true,
           "tags": [],
           "tests": [
@@ -81,12 +81,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 14894,
+                  "duration": 8831,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-11-27T14:44:59.220Z",
+                  "startTime": "2026-11-27T15:02:47.791Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -94,9 +94,43 @@
               "status": "expected"
             }
           ],
-          "id": "ab57c5fe3967e8b9e931-314d92279776ac7d93ab",
-          "file": "deployed.spec.ts",
-          "line": 2,
+          "id": "1ba8b77368fd3441e8a3-bebcd06540b0ab180bdc",
+          "file": "functions.spec.ts",
+          "line": 23,
+          "column": 5
+        },
+        {
+          "title": "prompt release editor saves and publishes through the UI",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3258,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-27T15:02:56.797Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "1ba8b77368fd3441e8a3-f9ed51daab531ea7edf0",
+          "file": "functions.spec.ts",
+          "line": 36,
           "column": 5
         }
       ]
@@ -104,9 +138,9 @@
   ],
   "errors": [],
   "stats": {
-    "startTime": "2026-11-27T14:44:56.301Z",
-    "duration": 18344.050000000003,
-    "expected": 1,
+    "startTime": "2026-11-27T15:02:45.436Z",
+    "duration": 14767.171,
+    "expected": 2,
     "skipped": 0,
     "unexpected": 0,
     "flaky": 0

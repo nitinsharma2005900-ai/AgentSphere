@@ -1,0 +1,570 @@
+{
+  "checked_at": "2026-11-27T15:01:19.949613+00:00",
+  "base_url": "https://agentsphere-api-nitinsharma.onrender.com/api/v1",
+  "isolation": "Synthetic QA tenant; demo accounts and existing user records preserved",
+  "results": [
+    {
+      "function": "Unauthenticated API access is denied",
+      "passed": true,
+      "detail": "HTTP 401"
+    },
+    {
+      "function": "Weak signup password is rejected",
+      "passed": true,
+      "detail": "HTTP 400"
+    },
+    {
+      "function": "Signup creates isolated organization",
+      "passed": true,
+      "detail": "HTTP 201"
+    },
+    {
+      "function": "Current session profile",
+      "passed": true,
+      "detail": "HTTP 200"
+    },
+    {
+      "function": "Duplicate account is rejected",
+      "passed": true,
+      "detail": "HTTP 409"
+    },
+    {
+      "function": "Organization listing",
+      "passed": true,
+      "detail": "HTTP 200"
+    },
+    {
+      "function": "Organization listing is tenant scoped",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "function": "Foreign organization switch denied",
+      "passed": true,
+      "detail": "HTTP 403"
+    },
+    {
+      "function": "Foreign agent cannot be read",
+      "passed": true,
+      "detail": "HTTP 404"
+    },
+    {
+      "function": "Tenant query spoofing rejected",
+      "passed": true,
+      "detail": "HTTP 403"
+    },
+    {
+      "function": "System tools provisioned for new tenant",
+      "passed": true,
+      "detail": "HTTP 200"
+    },
+    {
+      "function": "Execute calculator",
+      "passed": true,
+      "detail": "HTTP 200"
+    },
+    {
+      "function": "calculator returns correct result",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "function": "Execute date_time",
+      "passed": true,
+      "detail": "HTTP 200"
+    },
+    {
+      "function": "date_time returns correct result",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "function": "Execute json_transform",
+      "passed": true,
+      "detail": "HTTP 200"
+    },
+    {
+      "function": "json_transform returns correct result",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "function": "Malformed calculator input rejected",
+      "passed": true,
+      "detail": "HTTP 400"
+    },
+    {
+      "function": "Division by zero rejected",
+      "passed": true,
+      "detail": "HTTP 400"
+    },
+    {
+      "function": "Disable tool",
+      "passed": true,
+      "detail": "HTTP 200"
+    },
+    {
+      "function": "Disabled tool cannot execute",
+      "passed": true,
+      "detail": "HTTP 403"
+    },
+    {
+      "function": "Re-enable tool",
+      "passed": true,
+      "detail": "HTTP 200"
+    },
+    {
+      "function": "Unsafe external endpoint rejected",
+      "passed": true,
+      "detail": "HTTP 400"
+    },
+    {
+      "function": "Register allowed HTTPS tool",
+      "passed": true,
+      "detail": "HTTP 201"
+    },
+    {
+      "function": "Update tool schema",
+      "passed": true,
+      "detail": "HTTP 200"
+    },
+    {
+      "function": "Tool schema revisions retained",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "function": "Store encrypted synthetic tool credential",
+      "passed": true,
+      "detail": "HTTP 200"
+    },
+    {
+      "function": "Create agent",
+      "passed": true,
+      "detail": "HTTP 201"
+    },
+    {
+      "function": "Edit agent",
+      "passed": true,
+      "detail": "HTTP 200"
+    },
+    {
+      "function": "Read persisted agent",
+      "passed": true,
+      "detail": "HTTP 200"
+    },
+    {
+      "function": "Zero temperature persists correctly",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "function": "Agent identity reassignment rejected",
+      "passed": true,
+      "detail": "HTTP 400"
+    },
+    {
+      "function": "Invalid agent token limit rejected",
+      "passed": true,
+      "detail": "HTTP 400"
+    },
+    {
+      "function": "Duplicate agent",
+      "passed": true,
+      "detail": "HTTP 201"
+    },
+    {
+      "function": "Duplicated agent has distinct identity",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "function": "Create published prompt version",
+      "passed": true,
+      "detail": "HTTP 201"
+    },
+    {
+      "function": "Create second prompt version",
+      "passed": true,
+      "detail": "HTTP 201"
+    },
+    {
+      "function": "Prompt versions increment",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "function": "Publish second prompt",
+      "passed": true,
+      "detail": "HTTP 200"
+    },
+    {
+      "function": "Exactly one active agent prompt",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "function": "Rollback active prompt version",
+      "passed": true,
+      "detail": "HTTP 200"
+    },
+    {
+      "function": "Create standalone published prompt",
+      "passed": true,
+      "detail": "HTTP 201"
+    },
+    {
+      "function": "Standalone prompt does not unpublish agent prompt",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "function": "Missing template variables rejected",
+      "passed": true,
+      "detail": "HTTP 400"
+    },
+    {
+      "function": "Upload and index txt",
+      "passed": true,
+      "detail": "HTTP 201"
+    },
+    {
+      "function": "Upload and index md",
+      "passed": true,
+      "detail": "HTTP 201"
+    },
+    {
+      "function": "Upload and index csv",
+      "passed": true,
+      "detail": "HTTP 201"
+    },
+    {
+      "function": "Upload and index PDF",
+      "passed": true,
+      "detail": "HTTP 201"
+    },
+    {
+      "function": "Upload and index DOCX",
+      "passed": true,
+      "detail": "HTTP 201"
+    },
+    {
+      "function": "List tenant documents",
+      "passed": true,
+      "detail": "HTTP 200"
+    },
+    {
+      "function": "All five document formats indexed",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "function": "Encrypted upload source is not exposed",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "function": "Unsupported upload rejected",
+      "passed": true,
+      "detail": "HTTP 400"
+    },
+    {
+      "function": "Empty upload rejected",
+      "passed": true,
+      "detail": "HTTP 400"
+    },
+    {
+      "function": "Empty knowledge query rejected",
+      "passed": true,
+      "detail": "HTTP 400"
+    },
+    {
+      "function": "Knowledge search",
+      "passed": true,
+      "detail": "HTTP 200"
+    },
+    {
+      "function": "Retrieved content comes from uploaded source",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "function": "Re-index original upload",
+      "passed": true,
+      "detail": "HTTP 200"
+    },
+    {
+      "function": "Create approval workflow",
+      "passed": true,
+      "detail": "HTTP 201"
+    },
+    {
+      "function": "Queue approval workflow",
+      "passed": true,
+      "detail": "HTTP 200"
+    },
+    {
+      "function": "Worker pauses at human gate",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "function": "Approve queued execution",
+      "passed": true,
+      "detail": "HTTP 200"
+    },
+    {
+      "function": "Approved execution performs downstream tool",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "function": "Duplicate approval rejected",
+      "passed": true,
+      "detail": "HTTP 409"
+    },
+    {
+      "function": "Reject queued execution",
+      "passed": true,
+      "detail": "HTTP 200"
+    },
+    {
+      "function": "Rejected execution fails safely",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "function": "Cancel paused execution",
+      "passed": true,
+      "detail": "HTTP 200"
+    },
+    {
+      "function": "Cancelled state persists",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "function": "Completed execution cannot be cancelled",
+      "passed": true,
+      "detail": "HTTP 409"
+    },
+    {
+      "function": "Create failure-path workflow",
+      "passed": true,
+      "detail": "HTTP 201"
+    },
+    {
+      "function": "Invalid tool fails workflow honestly",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "function": "Retry failed step",
+      "passed": true,
+      "detail": "HTTP 200"
+    },
+    {
+      "function": "Retry really re-executes instead of fabricating success",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "function": "Read saved execution trace",
+      "passed": true,
+      "detail": "HTTP 200"
+    },
+    {
+      "function": "List approval history",
+      "passed": true,
+      "detail": "HTTP 200"
+    },
+    {
+      "function": "Read usage counters",
+      "passed": true,
+      "detail": "HTTP 200"
+    },
+    {
+      "function": "Invalid billing plan rejected",
+      "passed": true,
+      "detail": "HTTP 400"
+    },
+    {
+      "function": "Switch simulated plan",
+      "passed": true,
+      "detail": "HTTP 200"
+    },
+    {
+      "function": "Read simulated invoices",
+      "passed": true,
+      "detail": "HTTP 200"
+    },
+    {
+      "function": "Simulated plan produces invoice",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "function": "Download usage CSV",
+      "passed": true,
+      "detail": "HTTP 200"
+    },
+    {
+      "function": "CSV is a real attachment",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "function": "Read tenant dashboard statistics",
+      "passed": true,
+      "detail": "HTTP 200"
+    },
+    {
+      "function": "Read audit history",
+      "passed": true,
+      "detail": "HTTP 200"
+    },
+    {
+      "function": "Read provider health",
+      "passed": true,
+      "detail": "HTTP 200"
+    },
+    {
+      "function": "Create scoped API key",
+      "passed": true,
+      "detail": "HTTP 201"
+    },
+    {
+      "function": "Scoped API key can read allowed resource",
+      "passed": true,
+      "detail": "HTTP 200"
+    },
+    {
+      "function": "Scoped API key cannot write",
+      "passed": true,
+      "detail": "HTTP 403"
+    },
+    {
+      "function": "Revoke API key",
+      "passed": true,
+      "detail": "HTTP 200"
+    },
+    {
+      "function": "Revoked key is rejected",
+      "passed": true,
+      "detail": "HTTP 401"
+    },
+    {
+      "function": "Create AI_BUILDER member",
+      "passed": true,
+      "detail": "HTTP 201"
+    },
+    {
+      "function": "AI_BUILDER login",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "function": "AI_BUILDER reads tenant agents",
+      "passed": true,
+      "detail": "HTTP 200"
+    },
+    {
+      "function": "Create AUDITOR member",
+      "passed": true,
+      "detail": "HTTP 201"
+    },
+    {
+      "function": "AUDITOR login",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "function": "AUDITOR reads tenant agents",
+      "passed": true,
+      "detail": "HTTP 200"
+    },
+    {
+      "function": "Auditor cannot create agents",
+      "passed": true,
+      "detail": "HTTP 403"
+    },
+    {
+      "function": "List team members",
+      "passed": true,
+      "detail": "HTTP 200"
+    },
+    {
+      "function": "Delete uploaded txt",
+      "passed": true,
+      "detail": "HTTP 200"
+    },
+    {
+      "function": "Delete uploaded md",
+      "passed": true,
+      "detail": "HTTP 200"
+    },
+    {
+      "function": "Delete uploaded csv",
+      "passed": true,
+      "detail": "HTTP 200"
+    },
+    {
+      "function": "Delete uploaded pdf",
+      "passed": true,
+      "detail": "HTTP 200"
+    },
+    {
+      "function": "Delete uploaded docx",
+      "passed": true,
+      "detail": "HTTP 200"
+    },
+    {
+      "function": "Archive created agent",
+      "passed": true,
+      "detail": "HTTP 200"
+    },
+    {
+      "function": "Archive duplicated agent",
+      "passed": true,
+      "detail": "HTTP 200"
+    },
+    {
+      "function": "Delete approval workflow",
+      "passed": true,
+      "detail": "HTTP 200"
+    },
+    {
+      "function": "Delete failed workflow",
+      "passed": true,
+      "detail": "HTTP 200"
+    },
+    {
+      "function": "Refresh rotates session",
+      "passed": true,
+      "detail": "HTTP 200"
+    },
+    {
+      "function": "Refresh replay rejected",
+      "passed": true,
+      "detail": "HTTP 401"
+    },
+    {
+      "function": "Incorrect current password rejected",
+      "passed": true,
+      "detail": "HTTP 400"
+    },
+    {
+      "function": "Change synthetic QA account password",
+      "passed": true,
+      "detail": "HTTP 200"
+    },
+    {
+      "function": "Password change revokes old session",
+      "passed": true,
+      "detail": "HTTP 401"
+    }
+  ],
+  "passed": 112,
+  "failed": 0,
+  "total": 112
+}

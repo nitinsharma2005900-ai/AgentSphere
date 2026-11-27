@@ -6,13 +6,13 @@
       "id": "01",
       "assessment": "AI SaaS frontend",
       "status": "Verified major flows",
-      "evidence": "Browser navigation, modals, tool execution, CSV download and mobile navigation; premium styles retained."
+      "evidence": "Live browser navigation, agent CRUD, knowledge upload/search/reindex/delete, prompt editing/publishing, workflow save/run/delete, CSV and mobile controls passed."
     },
     {
       "id": "02",
       "assessment": "AI platform backend",
       "status": "Verified",
-      "evidence": "57 documented core API operations; 30 backend tests and 13 live API checks."
+      "evidence": "57 documented core API operations; 31 backend tests, 112 current live function checks and 13 live RAG journey checks passed."
     },
     {
       "id": "03",
@@ -72,7 +72,7 @@
       "id": "12",
       "assessment": "Safety and reliability tests",
       "status": "Verified tested cases",
-      "evidence": "21 Python tests and 30 backend tests; injection, isolation, role escalation, replay, unsafe tools, loop and quota regression coverage."
+      "evidence": "21 Python tests and 31 backend tests; injection, isolation, role escalation, replay, unsafe tools, loop and quota regression coverage."
     },
     {
       "id": "13",
