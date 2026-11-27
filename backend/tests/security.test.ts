@@ -53,3 +53,14 @@ test('pinned public DNS uses the Node address-list callback contract',async()=>{
  expect(await ToolExecutor.external('https://api.open-meteo.com/v1/forecast',1000)).toEqual({verified:true});
  expect(dns.lookup).toHaveBeenCalledWith('api.open-meteo.com',{all:true,family:4});
 });
+test('publishing a standalone prompt preserves published agent prompts',async()=>{
+ const original=(await db.getAgentById('org-acme-1','agent-concierge-1'))!;
+ const agent=await db.createAgent({...original,id:'prompt-scope-agent',name:'Prompt scope regression'});
+ const first=await request(app).post('/api/v1/prompts').set('Authorization',`Bearer ${token}`).send({agentId:agent.id,title:'Agent release',templateText:'Agent instructions',isPublished:true});
+ expect(first.status).toBe(201);
+ const standalone=await request(app).post('/api/v1/prompts').set('Authorization',`Bearer ${token}`).send({title:'Standalone release',templateText:'Standalone instructions',isPublished:true});
+ expect(standalone.status).toBe(201);
+ expect(standalone.body.versionNumber).toBe(1);
+ const versions=await db.getPromptVersions('org-acme-1',agent.id);
+ expect(versions.find(version=>version.id===first.body.id)?.isPublished).toBe(true);
+});

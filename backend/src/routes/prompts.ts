@@ -15,7 +15,7 @@ router.post('/',builder,validate(z.object({agentId:z.string().max(150).optional(
  const orgId=req.user!.organizationId;
  if(req.body.agentId&&!await db.getAgentById(orgId,req.body.agentId))return res.status(404).json({error:'Agent not found in organization'});
  const version=await db.transaction('prompts:'+orgId,async()=>{
-  const existing=await db.getPromptVersions(orgId,req.body.agentId),now=new Date().toISOString();
+  const existing=(await db.getPromptVersions(orgId)).filter(version=>(version.agentId||null)===(req.body.agentId||null)),now=new Date().toISOString();
   if(req.body.isPublished)for(const old of existing)if(old.isPublished)await db.update('prompt_versions',old.id,{isPublished:false},orgId);
   return db.createPromptVersion({id:randomUUID(),organizationId:orgId,agentId:req.body.agentId,title:req.body.title,templateText:req.body.templateText,inputVariables:req.body.inputVariables||Array.from(req.body.templateText.matchAll(/{{\s*(\w+)\s*}}/g),(m:any)=>m[1]),changeSummary:req.body.changeSummary||'Prompt revision',isPublished:!!req.body.isPublished,versionNumber:Math.max(0,...existing.map(v=>v.versionNumber))+1,createdAt:now});
  });return res.status(201).json(version);
