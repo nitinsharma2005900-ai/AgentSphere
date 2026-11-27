@@ -55,6 +55,9 @@ jobs:
           cd backend
           npm ci
 
+      - name: Audit backend production dependencies
+        run: npm --prefix backend audit --omit=dev --audit-level=high
+
       - name: Run TypeScript Compile Check
         run: |
           cd backend
@@ -83,6 +86,9 @@ jobs:
         run: |
           cd frontend
           npm ci
+
+      - name: Audit frontend production dependencies
+        run: npm --prefix frontend audit --omit=dev --audit-level=high
 
       - name: Lint and type check frontend
         run: npm --prefix frontend run lint && npm --prefix frontend run typecheck
