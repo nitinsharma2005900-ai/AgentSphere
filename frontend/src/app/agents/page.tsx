@@ -126,7 +126,7 @@ export default function AgentsPage() {
       humanApprovalRequired: formApproval,
       toolPermissions: formTools,
       modelProvider: "gemini",
-      modelName: "gemini-3.8-flash",
+      modelName: "gemini-3.1-flash-lite",
     };
 
     if (selectedAgent && isEditing) {

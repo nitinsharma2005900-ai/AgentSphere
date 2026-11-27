@@ -245,7 +245,7 @@ export default function DashboardPage() {
             <div className="space-y-3">
               <div className="p-3 rounded-xl bg-obsidian-850 border border-white/5 flex items-center justify-between">
                 <div>
-                  <div className="text-xs font-semibold text-gray-200">Google Gemini 3.8 Flash</div>
+                  <div className="text-xs font-semibold text-gray-200">Google Gemini 3.1 Flash Lite Flash</div>
                   <div className="text-[10px] text-gray-400">Primary Model Provider</div>
                 </div>
                 <span className={`text-[10px] font-mono px-2 py-0.5 rounded ${

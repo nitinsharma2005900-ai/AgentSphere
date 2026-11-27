@@ -65,7 +65,7 @@ router.post(
       avatar: avatar || "bot",
       color: color || "#8B5CF6",
       modelProvider: modelProvider || "gemini",
-      modelName: modelName || "gemini-3.8-flash",
+      modelName: modelName || "gemini-3.1-flash-lite",
       temperature: typeof temperature === "number" ? temperature : 0.7,
       maxTokens: maxTokens || 2048,
       maxSteps: maxSteps || 15,

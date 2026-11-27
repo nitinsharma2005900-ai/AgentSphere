@@ -9,7 +9,7 @@ class Settings(BaseSettings):
     AI_PROVIDER: str = 'gemini'
     ALLOW_MOCK_PROVIDER: bool = False
     GEMINI_API_KEY: Optional[str] = None
-    GEMINI_MODEL: str = 'gemini-3.8-flash'
+    GEMINI_MODEL: str = 'gemini-3.1-flash-lite'
     GEMINI_FALLBACK_MODEL: Optional[str] = None
     EMBEDDING_PROVIDER: str = 'local'
     EMBEDDING_MODEL: str = 'gemini-embedding-001'
