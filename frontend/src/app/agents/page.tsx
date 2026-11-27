@@ -18,8 +18,9 @@ import {
   X,
   RefreshCw,
 } from "lucide-react";
-import { apiFetch } from "../../lib/api";
+import { apiFetch, waitExecution } from "../../lib/api";
 import { useAuth } from "../../context/AuthContext";
+import { Dialog } from "../../components/Feedback";
 
 export default function AgentsPage() {
   const { user } = useAuth();
@@ -40,6 +41,8 @@ export default function AgentsPage() {
   const [formPrompt, setFormPrompt] = useState("");
   const [formTemp, setFormTemp] = useState(0.7);
   const [formMaxTokens, setFormMaxTokens] = useState(2048);
+  const [formKnowledge,setFormKnowledge]=useState<string[]>([]);
+  const {data:knowledge}=useQuery({queryKey:["documents"],queryFn:()=>apiFetch("/documents")});
   const [formApproval, setFormApproval] = useState(false);
   const [formTools, setFormTools] = useState<string[]>(["knowledge_search"]);
 
@@ -88,6 +91,7 @@ export default function AgentsPage() {
   });
 
   const resetForm = () => {
+    setFormKnowledge([]);
     setFormName("");
     setFormDesc("");
     setFormPrompt("");
@@ -99,6 +103,7 @@ export default function AgentsPage() {
 
   const handleOpenEdit = (agent: any) => {
     setSelectedAgent(agent);
+    setFormKnowledge(agent.knowledgeBaseIds||[]);
     setFormName(agent.name);
     setFormDesc(agent.description);
     setFormPrompt(agent.systemPrompt);
@@ -112,6 +117,7 @@ export default function AgentsPage() {
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
     const payload = {
+      knowledgeBaseIds:formKnowledge,
       name: formName,
       description: formDesc,
       systemPrompt: formPrompt,
@@ -120,7 +126,7 @@ export default function AgentsPage() {
       humanApprovalRequired: formApproval,
       toolPermissions: formTools,
       modelProvider: "gemini",
-      modelName: "gemini-2.5-flash",
+      modelName: "gemini-3.8-flash",
     };
 
     if (selectedAgent && isEditing) {
@@ -140,22 +146,26 @@ export default function AgentsPage() {
     setIsRunningTest(true);
 
     try {
-      const exec = await apiFetch(`/agents/${selectedAgent.id}/run`, {
+      let exec = await apiFetch(`/agents/${selectedAgent.id}/run`, {
         method: "POST",
         body: JSON.stringify({ prompt: userMsg.text }),
       });
 
+      exec = await waitExecution(exec);
+      if(exec.status === "FAILED" || exec.status === "CANCELLED") throw new Error(exec.error || "Execution failed");
       const lastStep = exec.stepsTimeline?.[exec.stepsTimeline.length - 1];
       const botResponse =
+        (exec.status==="PAUSED_APPROVAL" ? "Execution paused for human authorization. Open Approval Center to review it." : null) ||
+        exec.output?.text ||
         lastStep?.outputData?.text ||
         lastStep?.outputData?.response ||
-        "Execution completed successfully.";
+        "Execution recorded. Open Observatory to inspect the result.";
 
       setTestHistory((prev) => [
         ...prev,
         {
           role: "assistant",
-          text: botResponse,
+          text: `${exec.provider === "mock" ? "[DEVELOPMENT MOCK ? not a real AI response]\n" : ""}${botResponse}`,
           tokens: exec.totalTokens,
           cost: exec.estimatedCostUsd,
           tools: exec.stepsTimeline?.filter((s: any) => s.name?.startsWith("Tool Call")),
@@ -307,7 +317,7 @@ export default function AgentsPage() {
 
       {/* Create / Edit Modal */}
       {isEditing && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm overflow-y-auto">
+        <Dialog className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm overflow-y-auto" onClose={()=>setIsEditing(false)} label="Agent dialog">
           <div className="w-full max-w-xl glass-panel-elevated p-6 rounded-2xl my-8">
             <div className="flex items-center justify-between pb-3 border-b border-white/5 mb-4">
               <h3 className="text-base font-bold text-white">
@@ -330,7 +340,7 @@ export default function AgentsPage() {
                   value={formName}
                   onChange={(e) => setFormName(e.target.value)}
                   placeholder="e.g. Autonomous Customer Concierge"
-                  className="w-full bg-obsidian-900 border border-white/10 rounded-lg p-2.5 text-white focus:outline-none focus:border-violet-500"
+                  className="w-full bg-obsidian-900 border border-white/10 rounded-lg p-2.5 text-white focus:outline-none focus:border-violet-500" aria-label="Agent Name"
                 />
               </div>
 
@@ -341,7 +351,7 @@ export default function AgentsPage() {
                   value={formDesc}
                   onChange={(e) => setFormDesc(e.target.value)}
                   placeholder="Summarize the core role and domain responsibility"
-                  className="w-full bg-obsidian-900 border border-white/10 rounded-lg p-2.5 text-white focus:outline-none focus:border-violet-500"
+                  className="w-full bg-obsidian-900 border border-white/10 rounded-lg p-2.5 text-white focus:outline-none focus:border-violet-500" aria-label="Purpose & Description"
                 />
               </div>
 
@@ -353,10 +363,11 @@ export default function AgentsPage() {
                   value={formPrompt}
                   onChange={(e) => setFormPrompt(e.target.value)}
                   placeholder="You are an enterprise AI agent. Analyze queries, verify policy guidelines, and cite references..."
-                  className="w-full bg-obsidian-900 border border-white/10 rounded-lg p-2.5 text-white font-mono text-[11px] focus:outline-none focus:border-violet-500"
+                  className="w-full bg-obsidian-900 border border-white/10 rounded-lg p-2.5 text-white font-mono text-[11px] focus:outline-none focus:border-violet-500" aria-label="System Instructions & Behavior Prompt"
                 />
               </div>
 
+              <fieldset className="space-y-2"><legend className="text-gray-300 mb-2">Knowledge sources</legend>{knowledge?.filter((d:any)=>d.status==='INDEXED').map((d:any)=><label key={d.id} className="flex gap-2 items-center"><input type="checkbox" checked={formKnowledge.includes(d.id)} onChange={e=>setFormKnowledge(ids=>e.target.checked?[...ids,d.id]:ids.filter(id=>id!==d.id))} aria-label="System Instructions & Behavior Prompt"/><span>{d.filename}</span></label>)}{!knowledge?.length&&<p className="text-gray-500">Upload a document in Knowledge Hub to connect retrieval.</p>}</fieldset>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <div className="flex justify-between mb-1">
@@ -370,16 +381,16 @@ export default function AgentsPage() {
                     step="0.05"
                     value={formTemp}
                     onChange={(e) => setFormTemp(parseFloat(e.target.value))}
-                    className="w-full accent-violet-500"
+                    className="w-full accent-violet-500" aria-label="Temperature"
                   />
                 </div>
                 <div>
                   <label className="block text-gray-300 font-medium mb-1">Max Output Tokens</label>
                   <input
-                    type="number"
+                    type="number" min={16} max={4096}
                     value={formMaxTokens}
                     onChange={(e) => setFormMaxTokens(parseInt(e.target.value))}
-                    className="w-full bg-obsidian-900 border border-white/10 rounded-lg p-2 text-white focus:outline-none"
+                    className="w-full bg-obsidian-900 border border-white/10 rounded-lg p-2 text-white focus:outline-none" aria-label="Max Output Tokens"
                   />
                 </div>
               </div>
@@ -406,7 +417,7 @@ export default function AgentsPage() {
                             if (e.target.checked) setFormTools([...formTools, tool.name]);
                             else setFormTools(formTools.filter((t) => t !== tool.name));
                           }}
-                          className="accent-violet-500"
+                          className="accent-violet-500" aria-label="Approved Tool Allowlist"
                         />
                         <span className="font-mono font-semibold">{tool.name}</span>
                       </label>
@@ -425,7 +436,7 @@ export default function AgentsPage() {
                   type="checkbox"
                   checked={formApproval}
                   onChange={(e) => setFormApproval(e.target.checked)}
-                  className="w-4 h-4 accent-violet-500 cursor-pointer"
+                  className="w-4 h-4 accent-violet-500 cursor-pointer" aria-label="Field"
                 />
               </div>
 
@@ -446,7 +457,7 @@ export default function AgentsPage() {
               </div>
             </form>
           </div>
-        </div>
+        </Dialog>
       )}
 
       {/* AI Testing Playground Drawer */}
@@ -537,7 +548,7 @@ export default function AgentsPage() {
               value={testPrompt}
               onChange={(e) => setTestPrompt(e.target.value)}
               placeholder="Ask agent, e.g. 'calculate 500 * 12' or 'check policy'..."
-              className="flex-1 bg-obsidian-900 border border-white/10 rounded-lg px-3 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-violet-500"
+              className="flex-1 bg-obsidian-900 border border-white/10 rounded-lg px-3 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-violet-500" aria-label="Ask agent, e.g. 'calculate 500 * 12' or 'check policy'..."
             />
             <button
               type="submit"

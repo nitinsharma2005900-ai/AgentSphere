@@ -8,11 +8,11 @@ import { requireRoles } from "../middleware/rbac";
 const router = Router();
 
 // Get usage limits & quota statistics
-router.get("/usage", authenticateToken, enforceTenantIsolation, (req: Request, res: Response) => {
-  const org = db.getOrganization(req.user!.organizationId);
+router.get("/usage", authenticateToken, enforceTenantIsolation, async (req: Request, res: Response) => {
+  const org = (await db.getOrganization(req.user!.organizationId));
   if (!org) return res.status(404).json({ error: "Organization not found" });
 
-  const executions = db.getExecutions(req.user!.organizationId);
+  const executions = (await db.getExecutions(req.user!.organizationId));
   const totalCost = executions.reduce((sum, e) => sum + (e.estimatedCostUsd || 0), 0);
   const percentUsed = Math.min(100, Math.round((org.usedTokensThisMonth / org.monthlyTokenLimit) * 100));
 
@@ -32,8 +32,8 @@ router.get("/usage", authenticateToken, enforceTenantIsolation, (req: Request, r
 });
 
 // List simulated invoices
-router.get("/invoices", authenticateToken, enforceTenantIsolation, (req: Request, res: Response) => {
-  const invoices = db.getInvoices(req.user!.organizationId);
+router.get("/invoices", authenticateToken, enforceTenantIsolation, async (req: Request, res: Response) => {
+  const invoices = (await db.getInvoices(req.user!.organizationId));
   return res.json(invoices);
 });
 
@@ -43,7 +43,7 @@ router.post(
   authenticateToken,
   enforceTenantIsolation,
   requireRoles(["ORGANIZATION_OWNER"]),
-  (req: Request, res: Response) => {
+  async (req: Request, res: Response) => {
     const { plan } = req.body;
     if (!["free", "pro", "enterprise"].includes(plan)) {
       return res.status(400).json({ error: "Invalid plan. Choose from: free, pro, enterprise." });
@@ -56,23 +56,23 @@ router.post(
     };
 
     const target = limits[plan];
-    const updated = db.updateOrganization(req.user!.organizationId, {
-      plan: plan as any,
-      monthlyTokenLimit: target.tokens,
-      dailyExecutionLimit: target.executions,
-    });
+    const updated = (await db.updateOrganization(req.user!.organizationId, {
+          plan: plan as any,
+          monthlyTokenLimit: target.tokens,
+          dailyExecutionLimit: target.executions,
+        }));
 
     // Create simulated invoice
-    db.createInvoice({
-      id: `inv-${uuidv4().substring(0, 8)}`,
-      organizationId: req.user!.organizationId,
-      plan: plan as any,
-      amountUsd: target.price,
-      status: "PAID",
-      billingPeriod: `${new Date().toLocaleString("default", { month: "long" })} 2026`,
-      invoiceDate: new Date().toISOString(),
-      tokenUsage: updated.usedTokensThisMonth,
-    });
+    (await db.createInvoice({
+            id: `inv-${uuidv4().substring(0, 8)}`,
+            organizationId: req.user!.organizationId,
+            plan: plan as any,
+            amountUsd: target.price,
+            status: "PAID",
+            billingPeriod: new Date().toLocaleDateString("en", {month:"long",year:"numeric",timeZone:"UTC"}),
+            invoiceDate: new Date().toISOString(),
+            tokenUsage: updated.usedTokensThisMonth,
+          }));
 
     return res.json({
       success: true,
@@ -83,15 +83,15 @@ router.post(
 );
 
 // Export usage report (CSV)
-router.get("/export-report", authenticateToken, enforceTenantIsolation, (req: Request, res: Response) => {
-  const executions = db.getExecutions(req.user!.organizationId);
-  const org = db.getOrganization(req.user!.organizationId);
+router.get("/export-report", authenticateToken, enforceTenantIsolation, async (req: Request, res: Response) => {
+  const executions = (await db.getExecutions(req.user!.organizationId));
+  const org = (await db.getOrganization(req.user!.organizationId));
 
   const rows = [
     ["Execution ID", "Title", "Status", "Total Tokens", "Estimated Cost USD", "Provider", "Start Time"],
     ...executions.map((e) => [
       e.id,
-      `"${e.title}"`,
+      e.title,
       e.status,
       e.totalTokens,
       e.estimatedCostUsd,
@@ -100,9 +100,10 @@ router.get("/export-report", authenticateToken, enforceTenantIsolation, (req: Re
     ]),
   ];
 
-  const csvContent = rows.map((r) => r.join(",")).join("\n");
+  const escapeCell=(value:unknown)=>{let text=String(value??'');if(/^[=+@\-\t\r]/.test(text))text="'"+text;return '"'+text.replace(/"/g,'""')+'"';};
+  const csvContent = rows.map(r=>r.map(escapeCell).join(',')).join('\r\n');
   res.setHeader("Content-Type", "text/csv");
-  res.setHeader("Content-Disposition", `attachment; filename="AgentSphere_Usage_Report_${org?.name.replace(/\s+/g, "_")}.csv"`);
+  res.setHeader("Content-Disposition", 'attachment; filename="AgentSphere_Usage_Report.csv"');
   return res.send(csvContent);
 });
 

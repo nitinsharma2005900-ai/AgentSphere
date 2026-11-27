@@ -1,0 +1,9 @@
+process.env.NODE_ENV='test';
+process.env.DATABASE_URL=process.env.TEST_DATABASE_URL||'';
+process.env.REDIS_URL='';
+process.env.ALLOW_MOCK_PROVIDER='true';
+process.env.SEED_DEMO='true';
+process.env.SERVICE_SECRET='test-only-service-key-not-for-production';
+process.env.JWT_SECRET='test-only-access-key-unique-for-unit-tests';
+process.env.JWT_REFRESH_SECRET='test-only-refresh-key-unique-for-unit-tests';
+process.env.ENCRYPTION_KEY='test-only-encryption-key-unique-for-unit-tests';

@@ -3,8 +3,10 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { apiFetch } from "../../../lib/api";
 import { useAuth } from "../../../context/AuthContext";
 import { Bot, ArrowRight, Lock, Mail, Sparkles, Shield, UserCheck, AlertCircle } from "lucide-react";
+import { Dialog } from "../../../components/Feedback";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -44,10 +46,10 @@ export default function LoginPage() {
     }
   };
 
-  const handleForgotPassword = (e: React.FormEvent) => {
+  const handleForgotPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!forgotEmail) return;
-    setForgotSuccess(true);
+    try { await apiFetch("/auth/forgot-password",{method:"POST",body:JSON.stringify({email:forgotEmail})}); } catch(error) {setError(error instanceof Error?error.message:"Recovery unavailable");}
   };
 
   return (
@@ -88,7 +90,7 @@ export default function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="name@company.com"
-                className="w-full bg-obsidian-900 border border-white/10 rounded-lg pl-9 pr-3 py-2 text-xs text-gray-100 placeholder-gray-500 focus:outline-none focus:border-violet-500"
+                className="w-full bg-obsidian-900 border border-white/10 rounded-lg pl-9 pr-3 py-2 text-xs text-gray-100 placeholder-gray-500 focus:outline-none focus:border-violet-500" aria-label="Work Email"
               />
             </div>
           </div>
@@ -112,7 +114,7 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••••••"
-                className="w-full bg-obsidian-900 border border-white/10 rounded-lg pl-9 pr-3 py-2 text-xs text-gray-100 placeholder-gray-500 focus:outline-none focus:border-violet-500"
+                className="w-full bg-obsidian-900 border border-white/10 rounded-lg pl-9 pr-3 py-2 text-xs text-gray-100 placeholder-gray-500 focus:outline-none focus:border-violet-500" aria-label="Password"
               />
             </div>
           </div>
@@ -188,15 +190,15 @@ export default function LoginPage() {
 
       {/* Forgot Password Modal */}
       {showForgotModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+        <Dialog className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm" onClose={()=>setShowForgotModal(false)} label="Account recovery">
           <div className="w-full max-w-sm glass-panel p-6 rounded-2xl shadow-2xl">
             <h3 className="text-base font-bold text-white mb-1">Reset Password</h3>
             <p className="text-xs text-gray-400 mb-4">
-              Enter your registered email. A secure delivery token link will be simulated.
+              Check whether email recovery is available for your workspace.
             </p>
             {forgotSuccess ? (
               <div className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs">
-                Password reset token dispatched to inbox. Please check your simulated email records.
+                Contact your organization owner for account recovery.
                 <button
                   onClick={() => { setShowForgotModal(false); setForgotSuccess(false); }}
                   className="mt-3 w-full py-1.5 rounded-lg bg-obsidian-850 hover:bg-obsidian-800 text-white text-xs font-semibold"
@@ -206,13 +208,14 @@ export default function LoginPage() {
               </div>
             ) : (
               <form onSubmit={handleForgotPassword} className="space-y-3">
+                {error && <p role="alert" className="text-red-300 text-xs">{error}</p>}
                 <input
                   type="email"
                   required
                   placeholder="name@company.com"
                   value={forgotEmail}
                   onChange={(e) => setForgotEmail(e.target.value)}
-                  className="w-full bg-obsidian-900 border border-white/10 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-violet-500"
+                  className="w-full bg-obsidian-900 border border-white/10 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-violet-500" aria-label="name@company.com"
                 />
                 <div className="flex gap-2">
                   <button
@@ -232,7 +235,7 @@ export default function LoginPage() {
               </form>
             )}
           </div>
-        </div>
+        </Dialog>
       )}
     </div>
   );

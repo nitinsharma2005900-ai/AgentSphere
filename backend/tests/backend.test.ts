@@ -1,4 +1,7 @@
 import request from "supertest";
+import { AiGatewayClient } from "../src/services/aiGatewayClient";
+import { db } from "../src/db/store";
+
 import { app } from "../src/index";
 
 describe("AgentSphere Backend Multi-Tenant API Test Suite", () => {
@@ -9,7 +12,13 @@ describe("AgentSphere Backend Multi-Tenant API Test Suite", () => {
   let workflowId: string;
   let executionId: string;
 
+  beforeEach(()=>{
+    jest.spyOn(AiGatewayClient,"generate").mockResolvedValue({content:'[TEST MOCK] Response fixture',provider:'mock',model:'test-mock',finishReason:'stop',isFallback:false,usage:{prompt_tokens:20,completion_tokens:20,total_tokens:40,estimated_cost_usd:0}});
+  });
   beforeAll(async () => {
+    await db.ready;
+
+
     // Log in as Organization Owner (Acme AI Global)
     const resOwner = await request(app)
       .post("/api/v1/auth/login")
@@ -182,3 +191,5 @@ describe("AgentSphere Backend Multi-Tenant API Test Suite", () => {
     });
   });
 });
+
+afterAll(async()=>{await db.close();});

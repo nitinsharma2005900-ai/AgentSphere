@@ -1,5 +1,5 @@
 import uuid
-from fastapi import APIRouter, UploadFile, File, Form, HTTPException
+from fastapi import APIRouter, UploadFile, File, Form, HTTPException, Header
 from pydantic import BaseModel, Field
 from typing import List, Optional, Dict, Any
 from ..rag.document_parser import DocumentParser, ParsedDocument
@@ -10,10 +10,10 @@ router = APIRouter(prefix="/documents", tags=["Knowledge & Documents"])
 parser = DocumentParser()
 
 class SemanticSearchRequest(BaseModel):
-    query: str
-    tenant_id: str
-    top_k: int = 4
-    min_similarity: float = 0.05
+    query: str = Field(min_length=1, max_length=8000)
+    tenant_id: str = Field(min_length=1, max_length=150)
+    top_k: int = Field(4, ge=1, le=10)
+    min_similarity: float = Field(0.05, ge=0, le=1)
     filter_doc_ids: Optional[List[str]] = None
 
 class IngestionResponse(BaseModel):
@@ -23,18 +23,21 @@ class IngestionResponse(BaseModel):
     total_chunks: int
     total_characters: int
     status: str = "indexed"
-    tenant_id: str
+    tenant_id: str = Field(min_length=1, max_length=150)
 
 @router.post("/upload", response_model=IngestionResponse)
 async def upload_and_index_document(
     file: UploadFile = File(...),
     tenant_id: str = Form(...),
     document_id: Optional[str] = Form(None),
+    x_tenant_id: str = Header(...),
 ):
+    if tenant_id != x_tenant_id:
+        raise HTTPException(403, "Tenant scope mismatch")
     if not tenant_id:
         raise HTTPException(status_code=400, detail="tenant_id is required for tenant isolation")
 
-    file_bytes = await file.read()
+    file_bytes = await file.read(25*1024*1024 + 1)
     filename = file.filename or "uploaded_file"
 
     try:
@@ -46,7 +49,7 @@ async def upload_and_index_document(
     except ValueError as ve:
         raise HTTPException(status_code=400, detail=str(ve))
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to process document: {str(e)}")
+        raise HTTPException(status_code=400, detail="Document processing failed") from None
 
     doc_id = document_id or str(uuid.uuid4())
     
@@ -66,7 +69,8 @@ async def upload_and_index_document(
                     metadata={
                         **chunk.metadata,
                         "document_id": doc_id,
-                        "filename": filename
+                        "filename": filename,
+                        "embedding_model": gateway.embedding_model
                     }
                 )
             )
@@ -84,7 +88,9 @@ async def upload_and_index_document(
     )
 
 @router.post("/search", response_model=List[SearchResult])
-async def search_knowledge(req: SemanticSearchRequest):
+async def search_knowledge(req: SemanticSearchRequest, x_tenant_id: str = Header(...)):
+    if req.tenant_id != x_tenant_id:
+        raise HTTPException(403, "Tenant scope mismatch")
     if not req.tenant_id:
         raise HTTPException(status_code=400, detail="tenant_id is required for retrieval isolation")
 
@@ -103,6 +109,8 @@ async def search_knowledge(req: SemanticSearchRequest):
     return results
 
 @router.delete("/{tenant_id}/{document_id}")
-async def delete_document_index(tenant_id: str, document_id: str):
+async def delete_document_index(tenant_id: str, document_id: str, x_tenant_id: str = Header(...)):
+    if tenant_id != x_tenant_id:
+        raise HTTPException(403, "Tenant scope mismatch")
     removed = vector_store.delete_document_chunks(tenant_id=tenant_id, document_id=document_id)
     return {"deleted_chunks": removed, "tenant_id": tenant_id, "document_id": document_id}

@@ -1,0 +1,13 @@
+{
+  "name": "agentsphere",
+  "version": "1.1.0",
+  "private": true,
+  "scripts": {
+    "build": "npm --prefix backend run build && npm --prefix frontend run build",
+    "lint": "npm --prefix frontend run lint",
+    "typecheck": "npm --prefix backend run build && npm --prefix frontend run typecheck",
+    "test": "npm --prefix backend test",
+    "test:python": "python -m pytest ai_service/tests -v",
+    "test:e2e": "npm --prefix frontend run test:e2e"
+  }
+}

@@ -15,6 +15,7 @@ import {
   UserCheck,
 } from "lucide-react";
 import { apiFetch } from "../../lib/api";
+import { AccessSettings } from "../../components/AccessSettings";
 import { useAuth } from "../../context/AuthContext";
 
 export default function AdminPage() {
@@ -23,6 +24,7 @@ export default function AdminPage() {
   const { data: auditLogs, isLoading: logsLoading, refetch: refetchLogs } = useQuery({
     queryKey: ["adminAuditLogs"],
     queryFn: () => apiFetch("/admin/audit-logs"),
+    enabled:!!user && ["ORGANIZATION_OWNER","AUDITOR","PLATFORM_ADMINISTRATOR"].includes(user.role),
   });
 
   const { data: providerHealth, refetch: refetchHealth } = useQuery({
@@ -41,6 +43,7 @@ export default function AdminPage() {
 
   return (
     <div className="space-y-6">
+      <AccessSettings />
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -53,7 +56,7 @@ export default function AdminPage() {
           </p>
         </div>
         <button
-          onClick={() => { refetchLogs(); refetchHealth(); }}
+          onClick={() => { if(["ORGANIZATION_OWNER","AUDITOR","PLATFORM_ADMINISTRATOR"].includes(user?.role||""))refetchLogs(); refetchHealth(); }}
           className="px-3.5 py-2 rounded-lg bg-obsidian-850 hover:bg-obsidian-800 border border-white/10 text-xs font-semibold text-gray-200 flex items-center gap-2 transition self-start"
         >
           <RefreshCw className="w-3.5 h-3.5 text-violet-400" />
@@ -71,7 +74,7 @@ export default function AdminPage() {
             </div>
             <div>
               <h3 className="text-sm font-bold text-white">Tenant Data Isolation</h3>
-              <span className="text-[10px] text-emerald-400 font-mono">100% ENFORCED</span>
+              <span className="text-[10px] text-emerald-400 font-mono">TENANT SCOPE</span>
             </div>
           </div>
           <p className="text-xs text-gray-400 leading-relaxed">
@@ -94,8 +97,8 @@ export default function AdminPage() {
             </div>
           </div>
           <div className="text-xs text-gray-400 space-y-1">
-            <div>• Google Gemini SDK: {gemini?.configured ? "Connected" : "Unconfigured (Safe Fallback)"}</div>
-            <div>• Mock Provider: Active (1.2ms latency)</div>
+            <div>â€¢ Google Gemini SDK: {gemini?.configured ? "Connected" : "Unconfigured (Safe Fallback)"}</div>
+            <div>â€¢ Mock Provider: Active (1.2ms latency)</div>
           </div>
         </div>
 
@@ -111,8 +114,8 @@ export default function AdminPage() {
             </div>
           </div>
           <div className="text-xs text-gray-400 space-y-1">
-            <div>• Node.js: {providerHealth?.backendService?.nodeVersion || "v22"}</div>
-            <div>• Memory: {providerHealth?.backendService?.memoryUsageMB || 45} MB</div>
+            <div>â€¢ Node.js: {providerHealth?.backendService?.nodeVersion || "v22"}</div>
+            <div>â€¢ Memory: {providerHealth?.backendService?.memoryUsageMB || 45} MB</div>
           </div>
         </div>
       </div>

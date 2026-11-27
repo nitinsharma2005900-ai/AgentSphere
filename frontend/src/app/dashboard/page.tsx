@@ -55,17 +55,13 @@ export default function DashboardPage() {
     queryFn: () => apiFetch("/admin/provider-health"),
   });
 
-  const chartData = [
-    { day: "Mon", tokens: 240000, cost: 0.048, success: 18 },
-    { day: "Tue", tokens: 380000, cost: 0.076, success: 24 },
-    { day: "Wed", tokens: 490000, cost: 0.098, success: 32 },
-    { day: "Thu", tokens: 620000, cost: 0.124, success: 41 },
-    { day: "Fri", tokens: 510000, cost: 0.102, success: 38 },
-    { day: "Sat", tokens: 320000, cost: 0.064, success: 22 },
-    { day: "Sun", tokens: 440000, cost: 0.088, success: 29 },
-  ];
+  const chartData = Array.from({length:7},(_,i)=>{
+    const date=new Date();date.setDate(date.getDate()-(6-i));const key=date.toISOString().slice(0,10);
+    const rows=executions?.filter((e:any)=>e.startTime?.startsWith(key))||[];
+    return {day:date.toLocaleDateString('en',{weekday:'short'}),tokens:rows.reduce((sum:number,e:any)=>sum+e.totalTokens,0),cost:rows.reduce((sum:number,e:any)=>sum+e.estimatedCostUsd,0),success:rows.filter((e:any)=>e.status==='COMPLETED').length};
+  });
 
-  const activeProvider = providerHealth?.aiGateway?.active_provider || "mock";
+  const activeProvider = providerHealth?.aiGateway?.active_provider || "unavailable";
   const geminiConfigured = providerHealth?.aiGateway?.providers?.gemini?.configured;
 
   return (
@@ -82,7 +78,7 @@ export default function DashboardPage() {
             Welcome back, {user?.name || "Operator"}
           </h1>
           <p className="text-xs text-gray-400 mt-1">
-            Tenant: <span className="text-gray-200 font-semibold">{user?.organizationName}</span> •
+            Tenant: <span className="text-gray-200 font-semibold">{user?.organizationName}</span> â€¢
             Role: <span className="text-violet-300 font-mono">{user?.role?.replace(/_/g, " ")}</span>
           </p>
         </div>
@@ -119,13 +115,12 @@ export default function DashboardPage() {
           <div className="flex items-start gap-2.5">
             <AlertTriangle className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" />
             <div>
-              <span className="font-semibold text-amber-300">Deterministic Mock Provider Active: </span>
-              GEMINI_API_KEY is not configured in environment. The platform is running in fully functional,
-              deterministic mock mode. To switch to live Google Gemini 2.5 Flash, add your key to `.env`.
+              <span className="font-semibold text-amber-300">Live inference unavailable: </span>
+              A real model provider has not been verified. Contact the service administrator to configure Gemini.
             </div>
           </div>
           <span className="text-[10px] font-mono uppercase bg-amber-950/60 px-2 py-0.5 rounded border border-amber-500/40 text-amber-300 flex-shrink-0">
-            Resilient Fallback
+            Configuration required
           </span>
         </div>
       )}
@@ -144,7 +139,7 @@ export default function DashboardPage() {
             {statsLoading ? "..." : stats?.totalAgents || 3}
           </div>
           <div className="mt-1 text-[11px] text-gray-400 flex items-center gap-1">
-            <span className="text-emerald-400 font-medium">100% Active</span> • Multi-model configured
+            <span className="text-emerald-400 font-medium">100% Active</span> â€¢ Multi-model configured
           </div>
         </div>
 
@@ -160,7 +155,7 @@ export default function DashboardPage() {
             {statsLoading ? "..." : stats?.activeWorkflows || 2}
           </div>
           <div className="mt-1 text-[11px] text-gray-400 flex items-center gap-1">
-            <span className="text-emerald-400 font-medium">React Flow Canvas</span> • Automated
+            <span className="text-emerald-400 font-medium">React Flow Canvas</span> â€¢ Automated
           </div>
         </div>
 
@@ -250,29 +245,29 @@ export default function DashboardPage() {
             <div className="space-y-3">
               <div className="p-3 rounded-xl bg-obsidian-850 border border-white/5 flex items-center justify-between">
                 <div>
-                  <div className="text-xs font-semibold text-gray-200">Google Gemini 2.5 Flash</div>
+                  <div className="text-xs font-semibold text-gray-200">Google Gemini 3.8 Flash</div>
                   <div className="text-[10px] text-gray-400">Primary Model Provider</div>
                 </div>
                 <span className={`text-[10px] font-mono px-2 py-0.5 rounded ${
                   geminiConfigured ? "bg-emerald-500/20 text-emerald-400" : "bg-gray-500/20 text-gray-400"
                 }`}>
-                  {geminiConfigured ? "CONNECTED" : "UNCONFIGURED"}
+                  {geminiConfigured ? "CONFIGURED" : "UNCONFIGURED"}
                 </span>
               </div>
 
               <div className="p-3 rounded-xl bg-obsidian-850 border border-white/5 flex items-center justify-between">
                 <div>
                   <div className="text-xs font-semibold text-gray-200">Deterministic Mock Provider</div>
-                  <div className="text-[10px] text-gray-400">Secondary Autonomous Adapter</div>
+                  <div className="text-[10px] text-gray-400">Explicit development adapter</div>
                 </div>
                 <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400">
-                  HEALTHY (1.2ms)
+                  DEVELOPMENT ADAPTER
                 </span>
               </div>
 
               <div className="p-3 rounded-xl bg-obsidian-850 border border-white/5 flex items-center justify-between">
                 <div>
-                  <div className="text-xs font-semibold text-gray-200">pgvector Semantic Index</div>
+                  <div className="text-xs font-semibold text-gray-200">Knowledge Retrieval Index</div>
                   <div className="text-[10px] text-gray-400">Tenant-Scoped Vector Space</div>
                 </div>
                 <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400">

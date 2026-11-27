@@ -4,24 +4,30 @@
   "description": "AgentSphere Core Node.js/Express Backend",
   "main": "dist/index.js",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && node -e \"require('fs').copyFileSync('src/db/schema.sql','dist/db/schema.sql')\"",
     "start": "node dist/index.js",
     "dev": "tsx watch src/index.ts",
-    "test": "jest --runInBand"
+    "test": "jest --runInBand",
+    "worker": "node dist/worker.js"
   },
   "dependencies": {
+    "ajv": "^8.20.0",
     "bcryptjs": "^2.4.3",
+    "bullmq": "^6.7.10",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
+    "express-async-errors": "^3.1.1",
+    "express-rate-limit": "^8.7.5",
     "helmet": "^7.1.0",
+    "ioredis": "^6.1.0",
     "jsonwebtoken": "^9.0.2",
-    "multer": "^1.4.5-lts.1",
+    "multer": "^2.5.0",
     "pg": "^8.12.0",
-    "uuid": "^10.0.0",
-    "zod": "^3.23.8",
     "swagger-ui-express": "^5.0.1",
-    "yamljs": "^0.3.0"
+    "uuid": "^10.0.0",
+    "yamljs": "^0.3.0",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",

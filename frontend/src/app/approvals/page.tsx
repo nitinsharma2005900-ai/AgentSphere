@@ -12,7 +12,7 @@ import {
   UserCheck,
   Send,
 } from "lucide-react";
-import { apiFetch } from "../../lib/api";
+import { notify, apiFetch } from "../../lib/api";
 import { useAuth } from "../../context/AuthContext";
 
 export default function ApprovalsPage() {
@@ -25,6 +25,7 @@ export default function ApprovalsPage() {
   const { data: approvals, isLoading } = useQuery({
     queryKey: ["approvals"],
     queryFn: () => apiFetch("/approvals"),
+    refetchInterval:3000,
   });
 
   // Approve mutation
@@ -37,7 +38,7 @@ export default function ApprovalsPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["approvals"] });
       queryClient.invalidateQueries({ queryKey: ["recentExecutions"] });
-      alert("Execution request authorized. The workflow engine has resumed.");
+      notify("Execution request authorized. The workflow engine has resumed.");
     },
   });
 
@@ -51,7 +52,7 @@ export default function ApprovalsPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["approvals"] });
       queryClient.invalidateQueries({ queryKey: ["recentExecutions"] });
-      alert("Execution request rejected. The workflow has safely terminated.");
+      notify("Execution request rejected. The workflow has safely terminated.");
     },
   });
 
@@ -102,7 +103,7 @@ export default function ApprovalsPage() {
                     <div>
                       <div className="text-sm font-bold text-white">Execution Checkpoint: {req.id}</div>
                       <div className="text-[10px] text-gray-400 font-mono">
-                        Execution: {req.executionId} • Step: {req.stepId}
+                        Execution: {req.executionId} â€¢ Step: {req.stepId}
                       </div>
                     </div>
                   </div>
@@ -132,7 +133,7 @@ export default function ApprovalsPage() {
                     placeholder="Optional authorization notes (e.g. Approved per quarterly budget exception)..."
                     value={notes[req.id] || ""}
                     onChange={(e) => setNotes({ ...notes, [req.id]: e.target.value })}
-                    className="flex-1 w-full bg-obsidian-900 border border-white/10 rounded-lg px-3 py-2 text-xs text-white placeholder-gray-500 focus:outline-none"
+                    className="flex-1 w-full bg-obsidian-900 border border-white/10 rounded-lg px-3 py-2 text-xs text-white placeholder-gray-500 focus:outline-none" aria-label="Optional authorization notes (e.g. Approved per quarterly budget exception)..."
                   />
                   <div className="flex gap-2 w-full sm:w-auto">
                     <button

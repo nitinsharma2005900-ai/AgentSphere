@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback, useMemo } from "react";
+import React, { useState, useCallback, useMemo, useEffect } from "react";
 import ReactFlow, {
   Background,
   Controls,
@@ -30,7 +30,7 @@ import {
   RefreshCw,
   Layers,
 } from "lucide-react";
-import { apiFetch } from "../../lib/api";
+import { notify, apiFetch, waitExecution } from "../../lib/api";
 
 // Custom Flow Nodes
 function StartNode({ data }: { data: any }) {
@@ -109,28 +109,30 @@ export default function WorkflowsPage() {
     queryFn: () => apiFetch("/workflows"),
   });
 
-  const [activeWorkflowId, setActiveWorkflowId] = useState<string>("wf-invoice-1");
+  const [activeWorkflowId, setActiveWorkflowId] = useState<string>('');
+  const [workflowInput,setWorkflowInput]=useState('{"query":"invoice approval policy","amount":6850}');
+  const [selectedNodeId,setSelectedNodeId]=useState('');
+  const [workflowName,setWorkflowName]=useState('New automation');
+  const {data:agents}=useQuery({queryKey:['agents'],queryFn:()=>apiFetch('/agents')});
+  const {data:tools}=useQuery({queryKey:['tools'],queryFn:()=>apiFetch('/tools')});
+
   const [activeExecutionResult, setActiveExecutionResult] = useState<any>(null);
   const [isExecuting, setIsExecuting] = useState(false);
 
-  // Initial nodes & edges
-  const initialNodes: Node[] = [
-    { id: "node-1", type: "start", position: { x: 50, y: 150 }, data: { label: "Invoice Ingest" } },
-    { id: "node-2", type: "knowledgeRetrieval", position: { x: 300, y: 150 }, data: { label: "Query Policy RAG" } },
-    { id: "node-3", type: "aiAgent", position: { x: 580, y: 150 }, data: { label: "Financial Auditor AI" } },
-    { id: "node-4", type: "humanApproval", position: { x: 860, y: 150 }, data: { label: "Manager Approval Gate" } },
-    { id: "node-5", type: "output", position: { x: 1140, y: 150 }, data: { label: "Ledger Update" } },
-  ];
-
-  const initialEdges: Edge[] = [
-    { id: "e1-2", source: "node-1", target: "node-2", animated: true },
-    { id: "e2-3", source: "node-2", target: "node-3", animated: true },
-    { id: "e3-4", source: "node-3", target: "node-4", animated: true },
-    { id: "e4-5", source: "node-4", target: "node-5", animated: true },
-  ];
-
+  const initialNodes:Node[]=[];
+  const initialEdges:Edge[]=[];
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+
+  useEffect(()=>{
+    if(!workflows?.length){setNodes([]);setEdges([]);return;}
+    const workflow=workflows.find((w:any)=>w.id===activeWorkflowId)||workflows[0];
+    if(workflow.id!==activeWorkflowId)setActiveWorkflowId(workflow.id);
+    setNodes(workflow.nodes);setEdges(workflow.edges);setWorkflowName(workflow.name);
+  },[workflows,activeWorkflowId,setNodes,setEdges]);
+  const selectedNode=nodes.find(n=>n.id===selectedNodeId);
+  const updateNode=(data:Record<string,unknown>)=>setNodes(current=>current.map(n=>n.id===selectedNodeId?{...n,data:{...n.data,...data}}:n));
+  const createWorkflow=async()=>{try{const workflow=await apiFetch('/workflows',{method:'POST',body:JSON.stringify({name:workflowName||'New automation'})});await queryClient.invalidateQueries({queryKey:['workflows']});setActiveWorkflowId(workflow.id);}catch(error){notify(error instanceof Error?error.message:'Create failed');}};
 
   const nodeTypes = useMemo(
     () => ({
@@ -139,6 +141,9 @@ export default function WorkflowsPage() {
       aiAgent: AgentNode,
       humanApproval: ApprovalNode,
       output: OutputNode,
+      tool: KnowledgeNode,
+      externalTool: KnowledgeNode,
+      condition: ApprovalNode,
     }),
     []
   );
@@ -149,15 +154,13 @@ export default function WorkflowsPage() {
   );
 
   // Add new node dynamically
-  const addNode = (type: string, label: string) => {
-    const id = `node-${Date.now().toString().slice(-4)}`;
-    const newNode: Node = {
-      id,
-      type,
-      position: { x: 400 + Math.random() * 80, y: 220 + Math.random() * 80 },
-      data: { label },
-    };
-    setNodes((nds) => [...nds, newNode]);
+  const addNode = (type:string,label:string) => {
+    const id=crypto.randomUUID(),end=nodes.find(n=>n.type==='output'),incoming=edges.find(e=>e.target===end?.id);
+    const data:any={label};if(type==='aiAgent')data.agentId=agents?.[0]?.id||'';
+    if(type==='tool'){data.toolName='calculator';data.args={expression:'1 + 1'};}
+    setNodes(current=>[...current,{id,type,position:{x:(end?.position.x||500)-200,y:220},data}]);
+    if(end&&incoming)setEdges(current=>[...current.filter(e=>e.id!==incoming.id),{...incoming,target:id},{id:crypto.randomUUID(),source:id,target:end.id,animated:true}]);
+    setSelectedNodeId(id);
   };
 
   // Run Workflow Mutation
@@ -166,22 +169,22 @@ export default function WorkflowsPage() {
     setActiveExecutionResult(null);
 
     try {
-      const exec = await apiFetch(`/workflows/${activeWorkflowId}/run`, {
+      const parsedInput=JSON.parse(workflowInput);
+      if(!parsedInput||Array.isArray(parsedInput)||typeof parsedInput!=='object')throw new Error('Workflow input must be a JSON object');
+      await apiFetch(`/workflows/${activeWorkflowId}`,{method:'PUT',body:JSON.stringify({nodes,edges,name:workflowName})});
+      let exec = await apiFetch(`/workflows/${activeWorkflowId}/run`, {
         method: "POST",
         body: JSON.stringify({
-          inputData: {
-            invoiceId: `INV-${Math.floor(1000 + Math.random() * 9000)}`,
-            amount: 6850.0,
-            currency: "USD",
-          },
+          inputData: parsedInput,
         }),
       });
 
+      exec=await waitExecution(exec);
       setActiveExecutionResult(exec);
       queryClient.invalidateQueries({ queryKey: ["recentExecutions"] });
       queryClient.invalidateQueries({ queryKey: ["approvals"] });
     } catch (err: any) {
-      alert(`Workflow Run Error: ${err.message}`);
+      notify(`Workflow Run Error: ${err.message}`);
     } finally {
       setIsExecuting(false);
     }
@@ -192,16 +195,33 @@ export default function WorkflowsPage() {
     try {
       await apiFetch(`/workflows/${activeWorkflowId}`, {
         method: "PUT",
-        body: JSON.stringify({ nodes, edges }),
+        body: JSON.stringify({ nodes, edges, name:workflowName }),
       });
-      alert("Workflow canvas saved successfully to PostgreSQL database.");
+      await queryClient.invalidateQueries({queryKey:["workflows"]});
+      notify("Workflow canvas saved.");
     } catch (err: any) {
-      alert(`Save failed: ${err.message}`);
+      notify(`Save failed: ${err.message}`);
     }
   };
 
   return (
-    <div className="h-[calc(100vh-120px)] flex flex-col gap-4">
+    <div className="min-h-[calc(100vh-120px)] flex flex-col gap-4">
+      <div className="flex flex-wrap items-center gap-2 text-xs">
+        <select aria-label="Active workflow" className="bg-obsidian-850 rounded-lg border border-white/10 p-2 max-w-full" value={activeWorkflowId} onChange={e=>setActiveWorkflowId(e.target.value)}><option value="" disabled>Select workflow</option>{workflows?.map((w:any)=><option key={w.id} value={w.id}>{w.name}</option>)}</select>
+        <input aria-label="Workflow name" className="bg-obsidian-850 rounded-lg border border-white/10 p-2" value={workflowName} onChange={e=>setWorkflowName(e.target.value)}/>
+        <button onClick={createWorkflow} className="text-violet-300 border border-violet-500/30 rounded-lg px-3 py-2">New workflow</button>
+        <button disabled={!activeWorkflowId} onClick={async()=>{if(!window.confirm('Delete this workflow? Execution history is retained.'))return;try{await apiFetch(`/workflows/${activeWorkflowId}`,{method:'DELETE'});setActiveWorkflowId('');await queryClient.invalidateQueries({queryKey:['workflows']});}catch(error){notify(error instanceof Error?error.message:'Delete failed');}}} className="text-red-300 border border-red-500/30 rounded-lg px-3 py-2">Delete workflow</button>
+      </div>
+      <div className="flex flex-wrap gap-3 text-xs">
+        <label className="flex-1 min-w-[200px] text-gray-400">Execution input (JSON)<textarea aria-label="Workflow execution input" rows={2} value={workflowInput} onChange={e=>setWorkflowInput(e.target.value)} className="w-full mt-1 rounded-lg p-2 bg-obsidian-900 border border-white/10 font-mono text-gray-200"/></label>
+        {selectedNode&&<div className="p-3 rounded-xl border border-violet-500/30 bg-obsidian-900 space-y-2 max-w-full">
+          <label>Step label <input aria-label="Step label" value={selectedNode.data.label||''} onChange={e=>updateNode({label:e.target.value})} className="bg-obsidian-850 border border-white/10 rounded p-1"/></label>
+          {selectedNode.type==='aiAgent'&&<label className="block">Agent <select aria-label="Workflow step agent" value={selectedNode.data.agentId||''} onChange={e=>updateNode({agentId:e.target.value})} className="bg-obsidian-850 rounded p-1"><option value="">Choose agent</option>{agents?.map((a:any)=><option key={a.id} value={a.id}>{a.name}</option>)}</select></label>}
+          {selectedNode.type==='knowledgeRetrieval'&&<label className="block">Search query <input aria-label="Workflow search query" value={selectedNode.data.query||''} onChange={e=>updateNode({query:e.target.value})} className="bg-obsidian-850 rounded p-1"/></label>}
+          {['tool','externalTool'].includes(selectedNode.type || '')&&<><select aria-label="Workflow step tool" value={selectedNode.data.toolName||''} onChange={e=>updateNode({toolName:e.target.value})} className="bg-obsidian-850 rounded p-1">{tools?.map((t:any)=><option key={t.id} value={t.name}>{t.name}</option>)}</select><textarea aria-label="Workflow tool arguments" defaultValue={JSON.stringify(selectedNode.data.args||{})} key={selectedNode.id} onBlur={e=>{try{updateNode({args:JSON.parse(e.target.value)});}catch{notify('Tool arguments must be valid JSON');}}} className="block bg-obsidian-850 border border-white/10 rounded p-1 font-mono"/></>}
+          <button onClick={()=>{setNodes(current=>current.filter(n=>n.id!==selectedNodeId));setEdges(current=>current.filter(e=>e.source!==selectedNodeId&&e.target!==selectedNodeId));setSelectedNodeId('');}} className="text-red-300 block">Remove selected step</button>
+        </div>}
+      </div>
       {/* Top Controls Toolbar */}
       <div className="flex flex-wrap items-center justify-between gap-3 p-4 rounded-xl glass-panel">
         <div className="flex items-center gap-3">
@@ -210,7 +230,7 @@ export default function WorkflowsPage() {
           </div>
           <div>
             <h1 className="text-sm font-bold text-white">Visual Workflow Automation Builder</h1>
-            <p className="text-[11px] text-gray-400">React Flow Canvas • Bounded Orchestration Engine</p>
+            <p className="text-[11px] text-gray-400">React Flow Canvas â€¢ Bounded Orchestration Engine</p>
           </div>
         </div>
 
@@ -237,7 +257,9 @@ export default function WorkflowsPage() {
 
           <div className="h-4 w-px bg-white/10 mx-1" />
 
+          <button onClick={()=>addNode('tool','Tool action')} className="text-xs text-indigo-300 px-3 py-2 border border-white/10 rounded-lg">Add Tool</button>
           <button
+            disabled={!activeWorkflowId || isExecuting}
             onClick={saveWorkflow}
             className="px-3 py-1.5 rounded-lg bg-obsidian-850 hover:bg-obsidian-800 border border-white/10 text-xs font-semibold text-gray-200 flex items-center gap-1.5 transition"
           >
@@ -247,7 +269,7 @@ export default function WorkflowsPage() {
 
           <button
             onClick={runWorkflow}
-            disabled={isExecuting}
+            disabled={!activeWorkflowId || isExecuting}
             className="px-4 py-1.5 rounded-lg text-xs font-semibold glow-btn text-white flex items-center gap-2 disabled:opacity-50 transition"
           >
             <Play className="w-3.5 h-3.5 fill-white" />
@@ -257,9 +279,10 @@ export default function WorkflowsPage() {
       </div>
 
       {/* Main Flow Canvas & Live Trace Inspector */}
-      <div className="flex-1 flex gap-4 min-h-0">
+      <div className="flex-1 flex flex-col lg:flex-row gap-4 min-h-[400px]">
         <div className="flex-1 rounded-2xl overflow-hidden glass-panel border border-white/10 relative">
           <ReactFlow
+            onNodeClick={(_event,node)=>setSelectedNodeId(node.id)}
             nodes={nodes}
             edges={edges}
             onNodesChange={onNodesChange}
@@ -312,7 +335,7 @@ export default function WorkflowsPage() {
                     </span>
                   </div>
                   <div className="text-[10px] text-gray-400 font-mono">
-                    ID: {activeExecutionResult.id} • Tokens: {activeExecutionResult.totalTokens}
+                    ID: {activeExecutionResult.id} â€¢ Tokens: {activeExecutionResult.totalTokens}
                   </div>
                 </div>
 

@@ -2,7 +2,7 @@ import pytest
 from fastapi.testclient import TestClient
 from ai_service.main import app
 
-client = TestClient(app)
+client = TestClient(app, headers={'X-Service-Key': 'test-only-service-key-not-for-production', 'X-Tenant-Id': 'test-tenant'})
 
 def test_root_endpoint():
     response = client.get("/")
@@ -20,7 +20,7 @@ def test_health_endpoint():
 
 def test_chat_generation_endpoint():
     payload = {
-        "messages": [{"role": "user", "content": "Calculate quarterly expenditure"}]
+        "messages": [{"role": "user", "content": "Calculate quarterly expenditure"}], "tenant_id": "test-tenant", "provider": "mock"
     }
     response = client.post("/api/v1/ai/generate", json=payload)
     assert response.status_code == 200

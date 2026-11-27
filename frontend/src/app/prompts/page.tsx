@@ -14,7 +14,8 @@ import {
   Sliders,
   Send,
 } from "lucide-react";
-import { apiFetch } from "../../lib/api";
+import { notify, apiFetch } from "../../lib/api";
+import { Dialog } from "../../components/Feedback";
 
 export default function PromptsPage() {
   const queryClient = useQueryClient();
@@ -28,6 +29,8 @@ export default function PromptsPage() {
   const [isTesting, setIsTesting] = useState(false);
 
   // New version form state
+  const [agentId,setAgentId]=useState("");
+  const {data:agents}=useQuery({queryKey:["agents"],queryFn:()=>apiFetch("/agents")});
   const [newTitle, setNewTitle] = useState("");
   const [newTemplate, setNewTemplate] = useState("");
   const [newSummary, setNewSummary] = useState("");
@@ -44,7 +47,7 @@ export default function PromptsPage() {
     mutationFn: (id: string) => apiFetch(`/prompts/${id}/publish`, { method: "POST" }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["promptVersions"] });
-      alert("Prompt version set as active published release.");
+      notify("Prompt version set as active published release.");
     },
   });
 
@@ -62,7 +65,8 @@ export default function PromptsPage() {
 
   // Run Prompt Test
   const handleRunTest = async () => {
-    if (!activeVersion) return;
+    const selected=activeVersion || versions?.[0];
+    if (!selected) return;
     setIsTesting(true);
     setTestResult(null);
 
@@ -70,20 +74,20 @@ export default function PromptsPage() {
       const res = await apiFetch("/prompts/test", {
         method: "POST",
         body: JSON.stringify({
-          templateText: activeVersion.templateText,
+          templateText: selected.templateText,
           variables: testVariables,
           provider: "gemini",
         }),
       });
       setTestResult(res);
     } catch (err: any) {
-      alert(`Test failed: ${err.message}`);
+      notify(`Test failed: ${err.message}`);
     } finally {
       setIsTesting(false);
     }
   };
 
-  const currentSelection = activeVersion || (versions && versions[0]);
+  const currentSelection = versions?.find((v:any)=>v.id===activeVersion?.id) || versions?.[0];
 
   return (
     <div className="space-y-6">
@@ -134,7 +138,7 @@ export default function PromptsPage() {
                     <div className="flex items-center justify-between mb-1">
                       <span className="text-xs font-bold text-white flex items-center gap-1.5">
                         <GitCommit className="w-3.5 h-3.5 text-violet-400" />
-                        <span>v{v.versionNumber} – {v.title}</span>
+                        <span>v{v.versionNumber} â€“ {v.title}</span>
                       </span>
                       {v.isPublished && (
                         <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
@@ -213,7 +217,7 @@ export default function PromptsPage() {
                       onChange={(e) =>
                         setTestVariables({ ...testVariables, transactions: e.target.value })
                       }
-                      className="w-full bg-obsidian-900 border border-white/10 rounded-lg p-2 text-white font-mono text-[11px] focus:outline-none"
+                      className="w-full bg-obsidian-900 border border-white/10 rounded-lg p-2 text-white font-mono text-[11px] focus:outline-none" aria-label="Prompt Template"
                     />
                   </div>
                   <div>
@@ -226,7 +230,7 @@ export default function PromptsPage() {
                       onChange={(e) =>
                         setTestVariables({ ...testVariables, threshold: e.target.value })
                       }
-                      className="w-full bg-obsidian-900 border border-white/10 rounded-lg p-2 text-white font-mono text-[11px] focus:outline-none"
+                      className="w-full bg-obsidian-900 border border-white/10 rounded-lg p-2 text-white font-mono text-[11px] focus:outline-none" aria-label="Field"
                     />
                   </div>
                 </div>
@@ -247,7 +251,7 @@ export default function PromptsPage() {
                   <div className="flex items-center justify-between text-xs">
                     <span className="font-bold text-violet-300">Execution Output</span>
                     <span className="text-[10px] font-mono text-gray-400">
-                      Tokens: {testResult.usage?.total_tokens} • Est: ${testResult.usage?.estimated_cost_usd}
+                      Tokens: {testResult.usage?.total_tokens} â€¢ Est: ${testResult.usage?.estimated_cost_usd}
                     </span>
                   </div>
                   <div className="p-3 rounded-lg bg-obsidian-900 font-mono text-xs text-gray-200 whitespace-pre-wrap leading-relaxed">
@@ -266,10 +270,11 @@ export default function PromptsPage() {
 
       {/* New Version Modal */}
       {showNewModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm">
+        <Dialog className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm" onClose={()=>setShowNewModal(false)} label="New prompt release">
           <div className="w-full max-w-lg glass-panel-elevated p-6 rounded-2xl space-y-4">
             <h3 className="text-base font-bold text-white">Create New Prompt Release</h3>
             <div className="space-y-3 text-xs">
+              <label className="block">Associated agent<select aria-label="Prompt agent" value={agentId} onChange={e=>setAgentId(e.target.value)} className="block w-full p-2 mt-1 bg-obsidian-900 rounded border border-white/10"><option value="">Standalone prompt</option>{agents?.map((a:any)=><option key={a.id} value={a.id}>{a.name}</option>)}</select></label>
               <div>
                 <label className="block text-gray-300 mb-1">Version Title</label>
                 <input
@@ -278,7 +283,7 @@ export default function PromptsPage() {
                   value={newTitle}
                   onChange={(e) => setNewTitle(e.target.value)}
                   placeholder="e.g. Optimized Financial Auditor Prompt"
-                  className="w-full bg-obsidian-900 border border-white/10 rounded-lg p-2 text-white"
+                  className="w-full bg-obsidian-900 border border-white/10 rounded-lg p-2 text-white" aria-label="Version Title"
                 />
               </div>
               <div>
@@ -289,7 +294,7 @@ export default function PromptsPage() {
                   value={newTemplate}
                   onChange={(e) => setNewTemplate(e.target.value)}
                   placeholder="Include dynamic variables like {{data}} or {{threshold}}..."
-                  className="w-full bg-obsidian-900 border border-white/10 rounded-lg p-2 text-white font-mono text-[11px]"
+                  className="w-full bg-obsidian-900 border border-white/10 rounded-lg p-2 text-white font-mono text-[11px]" aria-label="Prompt Template Text"
                 />
               </div>
               <div>
@@ -299,7 +304,7 @@ export default function PromptsPage() {
                   value={newSummary}
                   onChange={(e) => setNewSummary(e.target.value)}
                   placeholder="Describe regression changes or security additions"
-                  className="w-full bg-obsidian-900 border border-white/10 rounded-lg p-2 text-white"
+                  className="w-full bg-obsidian-900 border border-white/10 rounded-lg p-2 text-white" aria-label="Change Summary / Governance Notes"
                 />
               </div>
             </div>
@@ -313,6 +318,7 @@ export default function PromptsPage() {
               <button
                 onClick={() =>
                   createMutation.mutate({
+                    agentId:agentId||undefined,
                     title: newTitle,
                     templateText: newTemplate,
                     changeSummary: newSummary,
@@ -325,7 +331,7 @@ export default function PromptsPage() {
               </button>
             </div>
           </div>
-        </div>
+        </Dialog>
       )}
     </div>
   );

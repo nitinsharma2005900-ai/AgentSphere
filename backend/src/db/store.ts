@@ -1,45 +1,30 @@
 import fs from "fs";
 import path from "path";
 import bcrypt from "bcryptjs";
-import {
-  User,
-  Organization,
-  Agent,
-  PromptVersion,
-  ToolItem,
-  Workflow,
-  ExecutionRecord,
-  ApprovalRequest,
-  DocumentRecord,
-  AuditLog,
-  SubscriptionInvoice,
-} from "../types";
-
-export interface DatabaseState {
-  organizations: Organization[];
-  users: User[];
-  agents: Agent[];
-  promptVersions: PromptVersion[];
-  tools: ToolItem[];
-  workflows: Workflow[];
-  executions: ExecutionRecord[];
-  approvalRequests: ApprovalRequest[];
-  documents: DocumentRecord[];
-  auditLogs: AuditLog[];
-  invoices: SubscriptionInvoice[];
-}
-
-const DB_FILE_PATH = path.join(__dirname, "../../../data/agentsphere_store.json");
-
+import { Pool, PoolClient } from "pg";
+import { AsyncLocalStorage } from "async_hooks";
+import { config } from "../config";
+import { AppError } from "../services/errors";
+import { User, Organization, Agent, PromptVersion, ToolItem, Workflow, ExecutionRecord,
+ ApprovalRequest, DocumentRecord, AuditLog, SubscriptionInvoice } from "../types";
+type Kind = "organizations" | "users" | "agents" | "prompt_versions" | "tools" | "workflows" |
+ "executions" | "approval_requests" | "documents" | "audit_logs" | "invoices" | "sessions" | "api_keys" | "secrets";
+const kinds: Kind[] = ["organizations","users","agents","prompt_versions","tools","workflows",
+ "executions","approval_requests","documents","audit_logs","invoices","sessions","api_keys","secrets"];
 export class Store {
-  private state: DatabaseState;
-  private isLoaded = false;
-
+  public pool?: Pool;
+  public ready: Promise<void>;
+  private local = new Map<Kind, any[]>();
+  private context = new AsyncLocalStorage<PoolClient | "memory">();
+  private locks = new Map<string, Promise<unknown>>();
+  private localFile = path.resolve(__dirname, "../../../data/development-v2.json");
   constructor() {
-    this.state = this.getInitialState();
+    for (const kind of kinds) this.local.set(kind, []);
+    if (config.databaseUrl) this.pool = new Pool({ connectionString: config.databaseUrl, max: 8,
+      connectionTimeoutMillis: 10000, idleTimeoutMillis: 30000 });
+    this.ready = this.init();
   }
-
-  private getInitialState(): DatabaseState {
+  private getInitialState() {
     const passwordHash = bcrypt.hashSync("Password123!", 10);
     const now = new Date().toISOString();
 
@@ -140,7 +125,7 @@ export class Store {
         avatar: "bot",
         color: "#8B5CF6",
         modelProvider: "gemini",
-        modelName: "gemini-2.5-flash",
+        modelName: "gemini-3.8-flash",
         temperature: 0.6,
         maxTokens: 2048,
         maxSteps: 15,
@@ -162,7 +147,7 @@ export class Store {
         avatar: "briefcase",
         color: "#F59E0B",
         modelProvider: "gemini",
-        modelName: "gemini-2.5-flash",
+        modelName: "gemini-3.8-flash",
         temperature: 0.2,
         maxTokens: 3000,
         maxSteps: 20,
@@ -184,7 +169,7 @@ export class Store {
         avatar: "shield",
         color: "#10B981",
         modelProvider: "gemini",
-        modelName: "gemini-2.5-flash",
+        modelName: "gemini-3.8-flash",
         temperature: 0.3,
         maxTokens: 4096,
         maxSteps: 15,
@@ -206,7 +191,7 @@ export class Store {
         avatar: "cpu",
         color: "#EF4444",
         modelProvider: "gemini",
-        modelName: "gemini-2.5-flash",
+        modelName: "gemini-3.8-flash",
         temperature: 0.1,
         maxTokens: 2048,
         maxSteps: 10,
@@ -388,552 +373,154 @@ export class Store {
       },
     ];
 
-    const executions: ExecutionRecord[] = [
-      {
-        id: "exec-101",
-        organizationId: "org-acme-1",
-        workflowId: "wf-invoice-1",
-        agentId: "agent-financial-2",
-        title: "Q4 Vendor Invoice Batch #9421",
-        status: "COMPLETED",
-        startTime: new Date(Date.now() - 3600000 * 2).toISOString(),
-        endTime: new Date(Date.now() - 3600000 * 2 + 14200).toISOString(),
-        totalTokens: 1480,
-        estimatedCostUsd: 0.000355,
-        provider: "gemini",
-        stepsTimeline: [
-          {
-            stepIndex: 1,
-            nodeId: "node-1",
-            nodeType: "start",
-            name: "Trigger Event Received",
-            status: "SUCCESS",
-            inputData: { invoiceId: "INV-9421", amount: 7400.0 },
-            outputData: { validated: true },
-            tokensUsed: 0,
-            durationMs: 45,
-            timestamp: new Date(Date.now() - 3600000 * 2).toISOString(),
-          },
-          {
-            stepIndex: 2,
-            nodeId: "node-2",
-            nodeType: "knowledgeRetrieval",
-            name: "Policy Document Match",
-            status: "SUCCESS",
-            inputData: { query: "vendor rate card clause 4" },
-            outputData: { matchedChunks: 2, score: 0.92 },
-            tokensUsed: 220,
-            durationMs: 310,
-            timestamp: new Date(Date.now() - 3600000 * 2 + 50).toISOString(),
-          },
-          {
-            stepIndex: 3,
-            nodeId: "node-3",
-            nodeType: "aiAgent",
-            name: "Financial Auditor Assessment",
-            status: "SUCCESS",
-            inputData: { amount: 7400.0 },
-            outputData: { recommendation: "Approve - matches contract discount terms" },
-            tokensUsed: 1260,
-            durationMs: 1450,
-            timestamp: new Date(Date.now() - 3600000 * 2 + 400).toISOString(),
-          },
-          {
-            stepIndex: 4,
-            nodeId: "node-4",
-            nodeType: "humanApproval",
-            name: "Manager Approval Decided",
-            status: "SUCCESS",
-            inputData: { approver: "Elena Rostova" },
-            outputData: { approved: true, notes: "Approved per quarterly agreement" },
-            tokensUsed: 0,
-            durationMs: 12000,
-            timestamp: new Date(Date.now() - 3600000 * 2 + 2000).toISOString(),
-          },
-          {
-            stepIndex: 5,
-            nodeId: "node-5",
-            nodeType: "output",
-            name: "Ledger Record Written",
-            status: "SUCCESS",
-            inputData: { txId: "TX-77124" },
-            outputData: { ledgerStatus: "COMMITTED" },
-            tokensUsed: 0,
-            durationMs: 120,
-            timestamp: new Date(Date.now() - 3600000 * 2 + 14100).toISOString(),
-          },
-        ],
-      },
-      {
-        id: "exec-102",
-        organizationId: "org-acme-1",
-        workflowId: "wf-invoice-1",
-        agentId: "agent-financial-2",
-        title: "Off-Cycle Expense Claim #8819",
-        status: "PAUSED_APPROVAL",
-        startTime: new Date(Date.now() - 900000).toISOString(),
-        totalTokens: 840,
-        estimatedCostUsd: 0.000195,
-        provider: "gemini",
-        approvalRequestId: "appr-201",
-        stepsTimeline: [
-          {
-            stepIndex: 1,
-            nodeId: "node-1",
-            nodeType: "start",
-            name: "Claim Ingested",
-            status: "SUCCESS",
-            inputData: { claimId: "CLM-8819", requestedAmount: 6250.0 },
-            outputData: { validated: true },
-            tokensUsed: 0,
-            durationMs: 30,
-            timestamp: new Date(Date.now() - 900000).toISOString(),
-          },
-          {
-            stepIndex: 2,
-            nodeId: "node-2",
-            nodeType: "knowledgeRetrieval",
-            name: "Retrieve Travel Spending Cap",
-            status: "SUCCESS",
-            inputData: { query: "executive travel policy limits" },
-            outputData: { matchedChunks: 1, score: 0.88 },
-            tokensUsed: 190,
-            durationMs: 240,
-            timestamp: new Date(Date.now() - 899000).toISOString(),
-          },
-          {
-            stepIndex: 3,
-            nodeId: "node-3",
-            nodeType: "aiAgent",
-            name: "Auditor AI Discrepancy Check",
-            status: "SUCCESS",
-            inputData: { claimAmount: 6250.0, policyCap: 5000.0 },
-            outputData: { flagged: true, varianceReason: "Exceeds standard cap by $1,250. Human authorization required." },
-            tokensUsed: 650,
-            durationMs: 1100,
-            timestamp: new Date(Date.now() - 898000).toISOString(),
-          },
-          {
-            stepIndex: 4,
-            nodeId: "node-4",
-            nodeType: "humanApproval",
-            name: "Approval Gate Awaiting Review",
-            status: "PAUSED",
-            inputData: { pendingWithRole: "ORGANIZATION_OWNER" },
-            outputData: { status: "Awaiting decision" },
-            tokensUsed: 0,
-            durationMs: 0,
-            timestamp: new Date(Date.now() - 896000).toISOString(),
-          },
-        ],
-      },
-    ];
 
-    const approvalRequests: ApprovalRequest[] = [
-      {
-        id: "appr-201",
-        organizationId: "org-acme-1",
-        executionId: "exec-102",
-        stepId: "node-4",
-        prompt: "Expense claim CLM-8819 for $6,250.00 exceeds standard travel cap ($5,000.00). Do you approve this exception?",
-        context: {
-          employee: "Marcus Vance",
-          department: "AI Infrastructure",
-          requestedAmount: 6250.0,
-          policyLimit: 5000.0,
-          reason: "Emergency on-site GPU cluster maintenance flight and lodging"
-        },
-        status: "PENDING",
-        requestedAt: new Date(Date.now() - 896000).toISOString(),
-      },
-    ];
-
-    const documents: DocumentRecord[] = [
-      {
-        id: "doc-policy-1",
-        organizationId: "org-acme-1",
-        filename: "Enterprise_Security_Guidelines_2026.pdf",
-        fileType: "pdf",
-        fileSizeBytes: 148200,
-        totalChunks: 18,
-        totalCharacters: 24600,
-        status: "INDEXED",
-        uploadedByUserId: "user-builder-2",
-        createdAt: new Date(Date.now() - 86400000 * 2).toISOString(),
-        updatedAt: new Date(Date.now() - 86400000 * 2).toISOString(),
-      },
-      {
-        id: "doc-billing-2",
-        organizationId: "org-acme-1",
-        filename: "API_Billing_and_Quota_Policy.docx",
-        fileType: "docx",
-        fileSizeBytes: 82500,
-        totalChunks: 9,
-        totalCharacters: 12400,
-        status: "INDEXED",
-        uploadedByUserId: "user-owner-1",
-        createdAt: new Date(Date.now() - 86400000 * 5).toISOString(),
-        updatedAt: new Date(Date.now() - 86400000 * 5).toISOString(),
-      },
-    ];
-
-    const auditLogs: AuditLog[] = [
-      {
-        id: "audit-1",
-        organizationId: "org-acme-1",
-        userId: "user-owner-1",
-        userEmail: "owner@agentsphere.ai",
-        action: "ORGANIZATION_INITIALIZED",
-        resourceType: "organization",
-        resourceId: "org-acme-1",
-        details: { plan: "enterprise", monthlyLimit: 100000000 },
-        ipAddress: "127.0.0.1",
-        timestamp: new Date(Date.now() - 86400000 * 10).toISOString(),
-      },
-      {
-        id: "audit-2",
-        organizationId: "org-acme-1",
-        userId: "user-builder-2",
-        userEmail: "builder@agentsphere.ai",
-        action: "AGENT_PUBLISHED",
-        resourceType: "agent",
-        resourceId: "agent-financial-2",
-        details: { name: "Enterprise Financial Auditor", provider: "gemini" },
-        ipAddress: "127.0.0.1",
-        timestamp: new Date(Date.now() - 86400000 * 2).toISOString(),
-      },
-      {
-        id: "audit-3",
-        organizationId: "org-acme-1",
-        userId: "user-operator-3",
-        userEmail: "operator@agentsphere.ai",
-        action: "WORKFLOW_TRIGGERED",
-        resourceType: "workflow",
-        resourceId: "wf-invoice-1",
-        details: { executionId: "exec-101", title: "Q4 Vendor Invoice Batch #9421" },
-        ipAddress: "127.0.0.1",
-        timestamp: new Date(Date.now() - 3600000 * 2).toISOString(),
-      },
-    ];
-
-    const invoices: SubscriptionInvoice[] = [
-      {
-        id: "inv-2026-10",
-        organizationId: "org-acme-1",
-        plan: "enterprise",
-        amountUsd: 499.0,
-        status: "PAID",
-        billingPeriod: "October 2026",
-        invoiceDate: "2026-10-31T23:59:59Z",
-        tokenUsage: 14205000,
-      },
-      {
-        id: "inv-2026-11",
-        organizationId: "org-acme-1",
-        plan: "enterprise",
-        amountUsd: 499.0,
-        status: "PENDING",
-        billingPeriod: "November 2026 (Current)",
-        invoiceDate: "2026-11-27T00:00:00Z",
-        tokenUsage: 2458120,
-      },
-    ];
-
-    return {
-      organizations,
-      users,
-      agents,
-      promptVersions,
-      tools,
-      workflows,
-      executions,
-      approvalRequests,
-      documents,
-      auditLogs,
-      invoices,
-    };
+    for (const org of organizations) { org.usedTokensThisMonth = 0; org.usedExecutionsToday = 0; }
+    for (const agent of agents) agent.knowledgeBaseIds = [];
+    for (const wf of workflows) for (const node of wf.nodes) delete node.data.docId;
+    return { organizations, users, agents, promptVersions, tools, workflows,
+      executions: [], approvalRequests: [], documents: [], auditLogs: [], invoices: [] };
   }
 
-  public init() {
-    try {
-      const dir = path.dirname(DB_FILE_PATH);
-      if (!fs.existsSync(dir)) {
-        fs.mkdirSync(dir, { recursive: true });
-      }
-      if (fs.existsSync(DB_FILE_PATH)) {
-        const raw = fs.readFileSync(DB_FILE_PATH, "utf-8");
-        this.state = JSON.parse(raw);
-      } else {
-        this.persist();
-      }
-      this.isLoaded = true;
-    } catch (e) {
-      console.warn("Failed to read from persistent storage; using memory state", e);
+  private async init() {
+    if (this.pool) {
+      const sql = fs.readFileSync(path.join(__dirname, "schema.sql"), "utf8");
+      const client = await this.pool.connect();
+      try {
+        await client.query("BEGIN");
+        await client.query("SELECT pg_advisory_xact_lock(91009)");
+        await client.query(sql);
+        await this.context.run(client, async () => {
+          if ((await this.list("organizations")).length === 0 && config.seedDemo) await this.seed();
+        });
+        await client.query("COMMIT");
+      } catch (err) { await client.query("ROLLBACK"); throw err; }
+      finally { client.release(); }
+    } else {
+      if (config.nodeEnv !== "test" && fs.existsSync(this.localFile)) {
+        const saved = JSON.parse(fs.readFileSync(this.localFile, "utf8"));
+        for (const kind of kinds) this.local.set(kind, saved[kind] || []);
+      } else if (config.seedDemo) await this.seed();
     }
   }
-
+  private async seed() {
+    const state: any = this.getInitialState();
+    const aliases: Record<string,string> = { promptVersions:"prompt_versions", approvalRequests:"approval_requests", auditLogs:"audit_logs" };
+    for (const [key, records] of Object.entries(state)) for (const record of records as any[]) {
+      await this.put((aliases[key] || key) as Kind, record);
+    }
+  }
+  public async ping() { await this.ready; if (this.pool) await this.pool.query("SELECT 1"); return this.pool ? "postgresql" : "development-file"; }
+  public async close() { await this.pool?.end(); }
+  public async transaction<T>(key: string, work: () => Promise<T>): Promise<T> {
+    await this.ready;
+    if (this.context.getStore()) return work();
+    if (this.pool) {
+      const client = await this.pool.connect();
+      try {
+        await client.query("BEGIN");
+        await client.query("SELECT pg_advisory_xact_lock(hashtextextended($1, 0))", [key]);
+        const result = await this.context.run(client, work);
+        await client.query("COMMIT"); return result;
+      } catch (err) { await client.query("ROLLBACK"); throw err; }
+      finally { client.release(); }
+    }
+    const previous = this.locks.get("memory") || Promise.resolve();
+    const next = previous.catch(() => {}).then(async () => {
+      const snapshot = structuredClone(this.local);
+      try { return await this.context.run("memory", work); }
+      catch (err) { this.local = snapshot; this.persist(); throw err; }
+    });
+    this.locks.set("memory", next);
+    return next;
+  }
   public persist() {
-    try {
-      const dir = path.dirname(DB_FILE_PATH);
-      if (!fs.existsSync(dir)) {
-        fs.mkdirSync(dir, { recursive: true });
-      }
-      fs.writeFileSync(DB_FILE_PATH, JSON.stringify(this.state, null, 2), "utf-8");
-    } catch (e) {
-      console.error("Failed to persist database state", e);
+    if (this.pool || config.nodeEnv === "test") return;
+    fs.mkdirSync(path.dirname(this.localFile), { recursive:true });
+    fs.writeFileSync(this.localFile + ".tmp", JSON.stringify(Object.fromEntries(this.local)), { mode:0o600 });
+    fs.renameSync(this.localFile + ".tmp", this.localFile);
+  }
+  private query(text:string, values:any[] = []) {
+    const ctx = this.context.getStore();
+    return (ctx && ctx !== "memory" ? ctx : this.pool!).query(text, values);
+  }
+  public async list<T = any>(kind:Kind, orgId?:string):Promise<T[]> {
+    if (this.pool) {
+      const where = orgId ? (kind === "organizations" ? "WHERE id=$1" : "WHERE organization_id=$1") : "";
+      const result = await this.query(`SELECT data FROM ${kind} ${where} ORDER BY id`, orgId ? [orgId] : []);
+      return result.rows.map(r=>r.data);
     }
+    return structuredClone(this.local.get(kind)!.filter(r=>!orgId || (kind === "organizations" ? r.id : r.organizationId) === orgId));
   }
-
-  // --- Multi-Tenant Scoped Accessors ---
-
-  // Organizations
-  public getOrganization(id: string): Organization | undefined {
-    return this.state.organizations.find((o) => o.id === id);
+  public async get<T = any>(kind:Kind, id:string, orgId?:string):Promise<T | undefined> {
+    if (this.pool) {
+      const result = await this.query(`SELECT data FROM ${kind} WHERE id=$1 ${orgId ? "AND organization_id=$2" : ""}`, orgId ? [id,orgId] : [id]);
+      return result.rows[0]?.data;
+    }
+    return structuredClone(this.local.get(kind)!.find(r=>r.id === id && (!orgId || r.organizationId === orgId)));
   }
-
-  public getAllOrganizations(): Organization[] {
-    return this.state.organizations;
-  }
-
-  public createOrganization(org: Organization): Organization {
-    this.state.organizations.push(org);
-    this.persist();
-    return org;
-  }
-
-  public updateOrganization(id: string, updates: Partial<Organization>): Organization {
-    const idx = this.state.organizations.findIndex((o) => o.id === id);
-    if (idx === -1) throw new Error("Organization not found");
-    this.state.organizations[idx] = { ...this.state.organizations[idx], ...updates, updatedAt: new Date().toISOString() };
-    this.persist();
-    return this.state.organizations[idx];
-  }
-
-  // Users
-  public findUserByEmail(email: string): User | undefined {
-    return this.state.users.find((u) => u.email.toLowerCase() === email.toLowerCase());
-  }
-
-  public findUserById(id: string): User | undefined {
-    return this.state.users.find((u) => u.id === id);
-  }
-
-  public getUsers(orgId: string): User[] {
-    return this.state.users.filter((u) => u.organizationId === orgId);
-  }
-
-  public createUser(user: User): User {
-    this.state.users.push(user);
-    this.persist();
-    return user;
-  }
-
-  public updateUser(id: string, updates: Partial<User>): User {
-    const idx = this.state.users.findIndex((u) => u.id === id);
-    if (idx === -1) throw new Error("User not found");
-    this.state.users[idx] = { ...this.state.users[idx], ...updates, updatedAt: new Date().toISOString() };
-    this.persist();
-    return this.state.users[idx];
-  }
-
-  // Agents (Strictly Org-Scoped)
-  public getAgents(orgId: string): Agent[] {
-    return this.state.agents.filter((a) => a.organizationId === orgId && !a.isArchived);
-  }
-
-  public getAgentById(orgId: string, agentId: string): Agent | undefined {
-    return this.state.agents.find((a) => a.id === agentId && a.organizationId === orgId);
-  }
-
-  public createAgent(agent: Agent): Agent {
-    this.state.agents.push(agent);
-    this.persist();
-    return agent;
-  }
-
-  public updateAgent(orgId: string, agentId: string, updates: Partial<Agent>): Agent {
-    const idx = this.state.agents.findIndex((a) => a.id === agentId && a.organizationId === orgId);
-    if (idx === -1) throw new Error("Agent not found in organization");
-    this.state.agents[idx] = { ...this.state.agents[idx], ...updates, updatedAt: new Date().toISOString() };
-    this.persist();
-    return this.state.agents[idx];
-  }
-
-  public deleteAgent(orgId: string, agentId: string): boolean {
-    const initialLen = this.state.agents.length;
-    this.state.agents = this.state.agents.filter((a) => !(a.id === agentId && a.organizationId === orgId));
-    if (this.state.agents.length !== initialLen) {
+  public async put<T extends {id:string;organizationId?:string}>(kind:Kind, record:T):Promise<T> {
+    if (this.pool) {
+      if (kind === "organizations") await this.query(`INSERT INTO organizations(id,data) VALUES($1,$2) ON CONFLICT(id) DO UPDATE SET data=EXCLUDED.data`, [record.id, JSON.stringify(record)]);
+      else await this.query(`INSERT INTO ${kind}(id,organization_id,data) VALUES($1,$2,$3) ON CONFLICT(id) DO UPDATE SET data=EXCLUDED.data WHERE ${kind}.organization_id=EXCLUDED.organization_id`, [record.id, record.organizationId, JSON.stringify(record)]);
+    } else {
+      const records = this.local.get(kind)!; const i=records.findIndex(r=>r.id===record.id);
+      if (i<0) records.push(structuredClone(record)); else records[i]=structuredClone(record);
       this.persist();
-      return true;
     }
-    return false;
+    return record;
+  }
+  public async update<T>(kind:Kind, id:string, updates:Partial<T>, orgId?:string):Promise<T> {
+    const current:any = await this.get(kind,id,orgId);
+    if (!current) throw new AppError(404,"Resource not found in organization");
+    const merged = { ...current, ...updates, id:current.id, organizationId:current.organizationId, updatedAt:new Date().toISOString() };
+    return this.put(kind,merged);
+  }
+  public async remove(kind:Kind,id:string,orgId:string):Promise<boolean> {
+    if (this.pool) return (await this.query(`DELETE FROM ${kind} WHERE id=$1 AND organization_id=$2`,[id,orgId])).rowCount!>0;
+    const records = this.local.get(kind)!; const index=records.findIndex(r=>r.id===id&&r.organizationId===orgId);
+    if(index<0)return false; records.splice(index,1); this.persist(); return true;
   }
 
-  // Prompt Versions
-  public getPromptVersions(orgId: string, agentId?: string): PromptVersion[] {
-    return this.state.promptVersions.filter(
-      (pv) => pv.organizationId === orgId && (!agentId || pv.agentId === agentId)
-    );
-  }
-
-  public createPromptVersion(pv: PromptVersion): PromptVersion {
-    this.state.promptVersions.push(pv);
-    this.persist();
-    return pv;
-  }
-
-  // Tools
-  public getTools(orgId: string): ToolItem[] {
-    return this.state.tools.filter((t) => t.organizationId === orgId);
-  }
-
-  public getToolByName(orgId: string, name: string): ToolItem | undefined {
-    return this.state.tools.find((t) => t.name === name && (t.organizationId === orgId || t.isSystemTool));
-  }
-
-  public createTool(tool: ToolItem): ToolItem {
-    this.state.tools.push(tool);
-    this.persist();
-    return tool;
-  }
-
-  public updateTool(orgId: string, toolId: string, updates: Partial<ToolItem>): ToolItem {
-    const idx = this.state.tools.findIndex((t) => t.id === toolId && t.organizationId === orgId);
-    if (idx === -1) throw new Error("Tool not found");
-    this.state.tools[idx] = { ...this.state.tools[idx], ...updates };
-    this.persist();
-    return this.state.tools[idx];
-  }
-
-  // Workflows
-  public getWorkflows(orgId: string): Workflow[] {
-    return this.state.workflows.filter((w) => w.organizationId === orgId);
-  }
-
-  public getWorkflowById(orgId: string, workflowId: string): Workflow | undefined {
-    return this.state.workflows.find((w) => w.id === workflowId && w.organizationId === orgId);
-  }
-
-  public createWorkflow(wf: Workflow): Workflow {
-    this.state.workflows.push(wf);
-    this.persist();
-    return wf;
-  }
-
-  public updateWorkflow(orgId: string, wfId: string, updates: Partial<Workflow>): Workflow {
-    const idx = this.state.workflows.findIndex((w) => w.id === wfId && w.organizationId === orgId);
-    if (idx === -1) throw new Error("Workflow not found in organization");
-    this.state.workflows[idx] = { ...this.state.workflows[idx], ...updates, updatedAt: new Date().toISOString() };
-    this.persist();
-    return this.state.workflows[idx];
-  }
-
-  public deleteWorkflow(orgId: string, wfId: string): boolean {
-    const initLen = this.state.workflows.length;
-    this.state.workflows = this.state.workflows.filter((w) => !(w.id === wfId && w.organizationId === orgId));
-    if (this.state.workflows.length !== initLen) {
-      this.persist();
-      return true;
-    }
-    return false;
-  }
-
-  // Executions
-  public getExecutions(orgId: string): ExecutionRecord[] {
-    return this.state.executions.filter((e) => e.organizationId === orgId);
-  }
-
-  public getExecutionById(orgId: string, execId: string): ExecutionRecord | undefined {
-    return this.state.executions.find((e) => e.id === execId && e.organizationId === orgId);
-  }
-
-  public createExecution(exec: ExecutionRecord): ExecutionRecord {
-    this.state.executions.unshift(exec);
-    this.persist();
-    return exec;
-  }
-
-  public updateExecution(orgId: string, execId: string, updates: Partial<ExecutionRecord>): ExecutionRecord {
-    const idx = this.state.executions.findIndex((e) => e.id === execId && e.organizationId === orgId);
-    if (idx === -1) throw new Error("Execution not found");
-    this.state.executions[idx] = { ...this.state.executions[idx], ...updates };
-    this.persist();
-    return this.state.executions[idx];
-  }
-
-  // Approval Requests
-  public getApprovalRequests(orgId: string): ApprovalRequest[] {
-    return this.state.approvalRequests.filter((a) => a.organizationId === orgId);
-  }
-
-  public getApprovalRequestById(orgId: string, id: string): ApprovalRequest | undefined {
-    return this.state.approvalRequests.find((a) => a.id === id && a.organizationId === orgId);
-  }
-
-  public createApprovalRequest(appr: ApprovalRequest): ApprovalRequest {
-    this.state.approvalRequests.unshift(appr);
-    this.persist();
-    return appr;
-  }
-
-  public updateApprovalRequest(orgId: string, id: string, updates: Partial<ApprovalRequest>): ApprovalRequest {
-    const idx = this.state.approvalRequests.findIndex((a) => a.id === id && a.organizationId === orgId);
-    if (idx === -1) throw new Error("Approval request not found");
-    this.state.approvalRequests[idx] = { ...this.state.approvalRequests[idx], ...updates };
-    this.persist();
-    return this.state.approvalRequests[idx];
-  }
-
-  // Documents
-  public getDocuments(orgId: string): DocumentRecord[] {
-    return this.state.documents.filter((d) => d.organizationId === orgId);
-  }
-
-  public getDocumentById(orgId: string, docId: string): DocumentRecord | undefined {
-    return this.state.documents.find((d) => d.id === docId && d.organizationId === orgId);
-  }
-
-  public createDocument(doc: DocumentRecord): DocumentRecord {
-    this.state.documents.unshift(doc);
-    this.persist();
-    return doc;
-  }
-
-  public deleteDocument(orgId: string, docId: string): boolean {
-    const len = this.state.documents.length;
-    this.state.documents = this.state.documents.filter((d) => !(d.id === docId && d.organizationId === orgId));
-    if (this.state.documents.length !== len) {
-      this.persist();
-      return true;
-    }
-    return false;
-  }
-
-  // Audit Logs
-  public getAuditLogs(orgId: string): AuditLog[] {
-    return this.state.auditLogs.filter((a) => a.organizationId === orgId);
-  }
-
-  public logAudit(log: AuditLog): void {
-    this.state.auditLogs.unshift(log);
-    // Keep max 500 logs per instance to avoid unbounded growth
-    if (this.state.auditLogs.length > 500) {
-      this.state.auditLogs = this.state.auditLogs.slice(0, 500);
-    }
-    this.persist();
-  }
-
-  // Invoices & Billing
-  public getInvoices(orgId: string): SubscriptionInvoice[] {
-    return this.state.invoices.filter((i) => i.organizationId === orgId);
-  }
-
-  public createInvoice(inv: SubscriptionInvoice): SubscriptionInvoice {
-    this.state.invoices.unshift(inv);
-    this.persist();
-    return inv;
-  }
+  public getOrganization(id:string) { return this.get<Organization>("organizations",id); }
+  public getAllOrganizations() { return this.list<Organization>("organizations"); }
+  public createOrganization(value:Organization) { return this.put("organizations",value); }
+  public updateOrganization(id:string,value:Partial<Organization>) { return this.update<Organization>("organizations",id,value); }
+  public async findUserByEmail(email:string) { return (await this.list<User>("users")).find(u=>u.email.toLowerCase()===email.toLowerCase()); }
+  public findUserById(id:string) { return this.get<User>("users",id); }
+  public getUsers(orgId:string) { return this.list<User>("users",orgId); }
+  public createUser(value:User) { return this.put("users",value); }
+  public updateUser(id:string,value:Partial<User>) { return this.update<User>("users",id,value); }
+  public async getAgents(orgId:string) { return (await this.list<Agent>("agents",orgId)).filter(a=>!a.isArchived); }
+  public getAgentById(orgId:string,id:string) { return this.get<Agent>("agents",id,orgId); }
+  public createAgent(value:Agent) { return this.put("agents",value); }
+  public updateAgent(orgId:string,id:string,value:Partial<Agent>) { return this.update<Agent>("agents",id,value,orgId); }
+  public async deleteAgent(orgId:string,id:string) { if(!await this.getAgentById(orgId,id))return false; await this.updateAgent(orgId,id,{isArchived:true}); return true; }
+  public async getPromptVersions(orgId:string,agentId?:string) { return (await this.list<PromptVersion>("prompt_versions",orgId)).filter(v=>!agentId||v.agentId===agentId); }
+  public createPromptVersion(value:PromptVersion) { return this.put("prompt_versions",value); }
+  public getTools(orgId:string) { return this.list<ToolItem>("tools",orgId); }
+  public async getToolByName(orgId:string,name:string) { return (await this.getTools(orgId)).find(t=>t.name===name); }
+  public createTool(value:ToolItem) { return this.put("tools",value); }
+  public updateTool(orgId:string,id:string,value:Partial<ToolItem>) { return this.update<ToolItem>("tools",id,value,orgId); }
+  public getWorkflows(orgId:string) { return this.list<Workflow>("workflows",orgId); }
+  public getWorkflowById(orgId:string,id:string) { return this.get<Workflow>("workflows",id,orgId); }
+  public createWorkflow(value:Workflow) { return this.put("workflows",value); }
+  public updateWorkflow(orgId:string,id:string,value:Partial<Workflow>) { return this.update<Workflow>("workflows",id,value,orgId); }
+  public deleteWorkflow(orgId:string,id:string) { return this.remove("workflows",id,orgId); }
+  public async getExecutions(orgId:string) { return (await this.list<ExecutionRecord>("executions",orgId)).sort((a,b)=>b.startTime.localeCompare(a.startTime)); }
+  public getExecutionById(orgId:string,id:string) { return this.get<ExecutionRecord>("executions",id,orgId); }
+  public createExecution(value:ExecutionRecord) { return this.put("executions",value); }
+  public updateExecution(orgId:string,id:string,value:Partial<ExecutionRecord>) { return this.update<ExecutionRecord>("executions",id,value,orgId); }
+  public getApprovalRequests(orgId:string) { return this.list<ApprovalRequest>("approval_requests",orgId); }
+  public getApprovalRequestById(orgId:string,id:string) { return this.get<ApprovalRequest>("approval_requests",id,orgId); }
+  public createApprovalRequest(value:ApprovalRequest) { return this.put("approval_requests",value); }
+  public updateApprovalRequest(orgId:string,id:string,value:Partial<ApprovalRequest>) { return this.update<ApprovalRequest>("approval_requests",id,value,orgId); }
+  public getDocuments(orgId:string) { return this.list<DocumentRecord>("documents",orgId); }
+  public getDocumentById(orgId:string,id:string) { return this.get<DocumentRecord>("documents",id,orgId); }
+  public createDocument(value:DocumentRecord) { return this.put("documents",value); }
+  public deleteDocument(orgId:string,id:string) { return this.remove("documents",id,orgId); }
+  public getAuditLogs(orgId:string) { return this.list<AuditLog>("audit_logs",orgId); }
+  public logAudit(value:AuditLog) { return this.put("audit_logs",value); }
+  public getInvoices(orgId:string) { return this.list<SubscriptionInvoice>("invoices",orgId); }
+  public createInvoice(value:SubscriptionInvoice) { return this.put("invoices",value); }
 }
-
 export const db = new Store();
-db.init();

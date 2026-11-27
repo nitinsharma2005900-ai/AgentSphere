@@ -1,124 +1,58 @@
+import asyncio
+import json
 import logging
-from typing import AsyncGenerator, Dict, Any, List, Optional
-from .base import (
-    BaseAIProvider,
-    Message,
-    ToolDefinition,
-    GenerationResponse,
-)
 from .gemini_provider import GeminiProvider
 from .mock_provider import DeterministicMockProvider
 from ..core.config import settings
-
 logger = logging.getLogger(__name__)
-
 class ProviderGateway:
     def __init__(self):
         self.gemini_provider = GeminiProvider()
         self.mock_provider = DeterministicMockProvider()
         self.primary_provider_name = settings.AI_PROVIDER.lower()
-
-    def get_provider(self, requested_provider: Optional[str] = None) -> BaseAIProvider:
-        target = (requested_provider or self.primary_provider_name).lower()
-        if target == "gemini":
-            if self.gemini_provider.is_available():
-                return self.gemini_provider
-            logger.info("Gemini credentials missing or unavailable; using Deterministic Mock Provider.")
+    def get_provider(self, requested_provider=None):
+        name=(requested_provider or self.primary_provider_name).lower()
+        if name=='mock' and settings.ALLOW_MOCK_PROVIDER:
             return self.mock_provider
-        return self.mock_provider
-
-    async def generate_response(
-        self,
-        messages: List[Message],
-        provider_name: Optional[str] = None,
-        system_instruction: Optional[str] = None,
-        temperature: float = 0.7,
-        max_tokens: int = 2048,
-        tools: Optional[List[ToolDefinition]] = None,
-        response_schema: Optional[Dict[str, Any]] = None,
-    ) -> GenerationResponse:
-        provider = self.get_provider(provider_name)
+        if name=='gemini':
+            return self.gemini_provider
+        raise ValueError('Provider is unsupported or disabled')
+    async def generate_response(self,messages,provider_name=None,system_instruction=None,temperature=0.7,max_tokens=2048,tools=None,response_schema=None):
+        provider=self.get_provider(provider_name)
+        kwargs=dict(messages=messages,system_instruction=system_instruction,temperature=temperature,max_tokens=max_tokens,tools=tools,response_schema=response_schema)
         try:
-            return await provider.generate_response(
-                messages=messages,
-                system_instruction=system_instruction,
-                temperature=temperature,
-                max_tokens=max_tokens,
-                tools=tools,
-                response_schema=response_schema,
-            )
-        except Exception as e:
-            logger.error(f"Error in primary provider {provider.provider_name}: {e}")
-            # Controlled fallback to secondary mock provider if primary was gemini and failed
-            if provider.provider_name == "gemini":
-                logger.warning("Failing over to Deterministic Mock Provider due to upstream error.")
-                fallback_res = await self.mock_provider.generate_response(
-                    messages=messages,
-                    system_instruction=system_instruction,
-                    temperature=temperature,
-                    max_tokens=max_tokens,
-                    tools=tools,
-                    response_schema=response_schema,
-                )
-                fallback_res.is_fallback = True
-                fallback_res.content = f"[Fallback Notice: Gemini upstream unavailable ({str(e)})]\n\n" + fallback_res.content
-                return fallback_res
-            raise
-
-    async def generate_stream(
-        self,
-        messages: List[Message],
-        provider_name: Optional[str] = None,
-        system_instruction: Optional[str] = None,
-        temperature: float = 0.7,
-        max_tokens: int = 2048,
-        tools: Optional[List[ToolDefinition]] = None,
-    ) -> AsyncGenerator[str, None]:
-        provider = self.get_provider(provider_name)
-        try:
-            async for chunk in provider.generate_stream(
-                messages=messages,
-                system_instruction=system_instruction,
-                temperature=temperature,
-                max_tokens=max_tokens,
-                tools=tools,
-            ):
-                yield chunk
-        except Exception as e:
-            logger.error(f"Streaming failed on {provider.provider_name}: {e}")
-            if provider.provider_name == "gemini":
-                yield f"[Fallback Notice: Gemini streaming unavailable: {str(e)}]\n\n"
-                async for chunk in self.mock_provider.generate_stream(
-                    messages=messages,
-                    system_instruction=system_instruction,
-                    temperature=temperature,
-                    max_tokens=max_tokens,
-                    tools=tools,
-                ):
-                    yield chunk
+            result=await asyncio.wait_for(provider.generate_response(**kwargs),timeout=settings.EXECUTION_TIMEOUT_SECONDS+5)
+        except Exception:
+            # A secondary real Gemini model is preferred. Mock fallback requires an explicit development flag.
+            if provider.provider_name=='gemini' and settings.GEMINI_FALLBACK_MODEL:
+                result=await GeminiProvider(model_name=settings.GEMINI_FALLBACK_MODEL).generate_response(**kwargs)
+            elif provider.provider_name=='gemini' and settings.ALLOW_MOCK_PROVIDER:
+                result=await self.mock_provider.generate_response(**kwargs)
             else:
-                raise
-
-    async def check_all_health(self) -> Dict[str, Any]:
-        gemini_health = await self.gemini_provider.check_health()
-        mock_health = await self.mock_provider.check_health()
-        active_provider = "gemini" if self.gemini_provider.is_available() else "mock"
-        
-        return {
-            "status": "healthy" if (mock_health["status"] == "healthy") else "degraded",
-            "active_provider": active_provider,
-            "providers": {
-                "gemini": gemini_health,
-                "mock": mock_health
-            }
-        }
-
-    async def get_embeddings(self, texts: List[str], provider_name: Optional[str] = None) -> List[List[float]]:
-        provider = self.get_provider(provider_name)
-        try:
-            return await provider.get_embeddings(texts)
-        except Exception as e:
-            logger.warning(f"Embedding generation on {provider.provider_name} failed: {e}; falling back to mock vectorizer.")
-            return await self.mock_provider.get_embeddings(texts)
-
-gateway = ProviderGateway()
+                raise RuntimeError('Model provider unavailable. Configure credentials and retry.') from None
+            result.is_fallback=True
+            if result.provider=='mock':
+                result.content='[DEVELOPMENT MOCK FALLBACK — not a real AI response]\n'+result.content
+        if response_schema:
+            from jsonschema import validate
+            validate(json.loads(result.content),response_schema)
+        return result
+    async def generate_stream(self,messages,provider_name=None,system_instruction=None,temperature=0.7,max_tokens=2048,tools=None):
+        provider=self.get_provider(provider_name)
+        # Never append a second provider after partial output: callers must retry a fresh stream.
+        async for chunk in provider.generate_stream(messages,system_instruction,temperature,max_tokens,tools):
+            yield chunk
+    async def check_all_health(self):
+        configured=self.gemini_provider.is_available()
+        return {'status':'configured' if configured else 'degraded','active_provider':'gemini' if configured else ('mock' if settings.ALLOW_MOCK_PROVIDER else 'unavailable'),
+                'providers':{'gemini':await self.gemini_provider.check_health(),'mock':{**await self.mock_provider.check_health(),'enabled':settings.ALLOW_MOCK_PROVIDER}},
+                'embeddings':{'provider':settings.EMBEDDING_PROVIDER,'model':settings.EMBEDDING_MODEL if settings.EMBEDDING_PROVIDER=='gemini' else 'local-feature-hash-v1','semantic':settings.EMBEDDING_PROVIDER=='gemini'}}
+    async def get_embeddings(self,texts,provider_name=None):
+        # A corpus uses one fixed embedding space. Never silently mix real and local vectors.
+        if settings.EMBEDDING_PROVIDER=='gemini':
+            return await self.gemini_provider.get_embeddings(texts)
+        return await self.mock_provider.get_embeddings(texts)
+    @property
+    def embedding_model(self):
+        return settings.EMBEDDING_MODEL if settings.EMBEDDING_PROVIDER=='gemini' else 'local-feature-hash-v1'
+gateway=ProviderGateway()

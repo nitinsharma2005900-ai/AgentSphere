@@ -1,197 +1,69 @@
-import { Router, Request, Response } from "express";
+import { Router } from "express";
+import { z } from "zod";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { v4 as uuidv4 } from "uuid";
+import { randomUUID } from "crypto";
 import { db } from "../db/store";
 import { config } from "../config";
 import { authenticateToken } from "../middleware/auth";
-import { UserRole } from "../types";
-
-const router = Router();
-
-// Sign In
-router.post("/login", (req: Request, res: Response) => {
-  const { email, password } = req.body;
-  if (!email || !password) {
-    return res.status(400).json({ error: "Validation Error", message: "Email and password are required" });
-  }
-
-  const user = db.findUserByEmail(email);
-  if (!user) {
-    return res.status(401).json({ error: "Auth Error", message: "Invalid credentials" });
-  }
-
-  const passwordValid = bcrypt.compareSync(password, user.passwordHash);
-  if (!passwordValid) {
-    return res.status(401).json({ error: "Auth Error", message: "Invalid credentials" });
-  }
-
-  const org = db.getOrganization(user.organizationId);
-
-  const payload = {
-    id: user.id,
-    email: user.email,
-    role: user.role,
-    organizationId: user.organizationId,
-  };
-
-  const token = jwt.sign(payload, config.jwtSecret, { expiresIn: config.jwtExpiresIn as any });
-  const refreshToken = jwt.sign(payload, config.jwtRefreshSecret, { expiresIn: config.jwtRefreshExpiresIn as any });
-
-  db.logAudit({
-    id: `audit-${uuidv4().substring(0, 8)}`,
-    organizationId: user.organizationId,
-    userId: user.id,
-    userEmail: user.email,
-    action: "USER_LOGGED_IN",
-    resourceType: "auth",
-    resourceId: user.id,
-    details: { email: user.email, role: user.role },
-    ipAddress: req.ip || "127.0.0.1",
-    timestamp: new Date().toISOString(),
-  });
-
-  return res.json({
-    token,
-    refreshToken,
-    user: {
-      id: user.id,
-      email: user.email,
-      name: user.name,
-      role: user.role,
-      organizationId: user.organizationId,
-      organizationName: org?.name || "Default Org",
-    },
-  });
+import { validate } from "../middleware/validation";
+import { issueSession } from "../services/sessions";
+import { hash } from "../services/security";
+const router=Router();
+const credentials=z.object({email:z.string().trim().email().max(254).transform(s=>s.toLowerCase()),password:z.string().min(1).max(128)});
+router.post('/login',validate(credentials),async(req,res)=>{
+ const user=await db.findUserByEmail(req.body.email);
+ if(!user||!await bcrypt.compare(req.body.password,user.passwordHash))return res.status(401).json({error:'Invalid credentials'});
+ const org=await db.getOrganization(user.organizationId);
+ const tokens=await issueSession(user);
+ await db.logAudit({id:randomUUID(),organizationId:user.organizationId,userId:user.id,userEmail:user.email,action:'USER_LOGGED_IN',resourceType:'auth',resourceId:user.id,details:{},ipAddress:req.ip||'',timestamp:new Date().toISOString()});
+ const {passwordHash,...profile}=user;
+ return res.json({...tokens,user:{...profile,organizationName:org?.name}});
 });
-
-// Refresh Token
-router.post("/refresh", (req: Request, res: Response) => {
-  const { refreshToken } = req.body;
-  if (!refreshToken) {
-    return res.status(400).json({ error: "Validation Error", message: "Refresh token is required" });
-  }
-
-  try {
-    const decoded = jwt.verify(refreshToken, config.jwtRefreshSecret) as any;
-    const user = db.findUserById(decoded.id);
-    if (!user) {
-      return res.status(401).json({ error: "User not found" });
-    }
-
-    const payload = {
-      id: user.id,
-      email: user.email,
-      role: user.role,
-      organizationId: user.organizationId,
-    };
-
-    const newToken = jwt.sign(payload, config.jwtSecret, { expiresIn: config.jwtExpiresIn as any });
-    const newRefreshToken = jwt.sign(payload, config.jwtRefreshSecret, { expiresIn: config.jwtRefreshExpiresIn as any });
-
-    return res.json({ token: newToken, refreshToken: newRefreshToken });
-  } catch (e) {
-    return res.status(401).json({ error: "Invalid refresh token", message: "Session expired, please log in again." });
-  }
+router.post('/signup',validate(credentials.extend({password:z.string().min(10).max(128).regex(/[A-Z]/).regex(/[a-z]/).regex(/[0-9]/),name:z.string().trim().min(2).max(100),organizationName:z.string().trim().min(2).max(200).optional()}).strict()),async(req,res)=>{
+ const {email,password,name,organizationName}=req.body;
+ const result=await db.transaction('signup:'+email,async()=>{
+  if(await db.findUserByEmail(email))return null;
+  const now=new Date().toISOString(),organizationId=randomUUID();
+  const org=await db.createOrganization({id:organizationId,name:organizationName||`${name}'s Organization`,plan:'free',monthlyTokenLimit:1_000_000,usedTokensThisMonth:0,dailyExecutionLimit:200,usedExecutionsToday:0,createdAt:now,updatedAt:now});
+  const user=await db.createUser({id:randomUUID(),email,name,passwordHash:await bcrypt.hash(password,12),role:'ORGANIZATION_OWNER',organizationId,createdAt:now,updatedAt:now});
+  const templates=await db.getTools('org-acme-1');
+  for(const tool of templates.filter(t=>t.isSystemTool))await db.createTool({...tool,id:randomUUID(),organizationId});
+  return {org,user};
+ });
+ if(!result)return res.status(409).json({error:'An account already exists with this email'});
+ const {passwordHash,...user}=result.user;
+ return res.status(201).json({...await issueSession(result.user),user:{...user,organizationName:result.org.name}});
 });
-
-// Get Current Profile
-router.get("/me", authenticateToken, (req: Request, res: Response) => {
-  const user = db.findUserById(req.user!.id);
-  if (!user) {
-    return res.status(404).json({ error: "User not found" });
-  }
-  const org = db.getOrganization(user.organizationId);
-
-  return res.json({
-    user: {
-      id: user.id,
-      email: user.email,
-      name: user.name,
-      role: user.role,
-      organizationId: user.organizationId,
-      organizationName: org?.name || "Acme AI Global",
-    },
-    organization: org,
+router.post('/refresh',validate(z.object({refreshToken:z.string().min(20).max(4096)})),async(req,res)=>{
+ try {
+  const decoded=jwt.verify(req.body.refreshToken,config.jwtRefreshSecret,{algorithms:['HS256']}) as any;
+  const result=await db.transaction('session:'+decoded.sid,async()=>{
+   const session=await db.get('sessions',decoded.sid),user=await db.findUserById(decoded.id);
+   if(decoded.type!=='refresh'||!session||session.revoked||session.expiresAt<Date.now()||session.refreshHash!==hash(req.body.refreshToken)||!user)return null;
+   return issueSession(user,decoded.sid);
   });
+  if(result)return res.json(result);
+ }catch{}
+ return res.status(401).json({error:'Session expired. Sign in again.'});
 });
-
-// Sign Up
-router.post("/signup", (req: Request, res: Response) => {
-  const { email, password, name, organizationName, role } = req.body;
-  if (!email || !password || !name) {
-    return res.status(400).json({ error: "Validation Error", message: "Email, password, and name are required." });
-  }
-
-  const existing = db.findUserByEmail(email);
-  if (existing) {
-    return res.status(409).json({ error: "Conflict", message: "User with this email already exists." });
-  }
-
-  // Create new organization or link
-  const orgId = `org-${uuidv4().substring(0, 8)}`;
-  const now = new Date().toISOString();
-  const org = db.createOrganization({
-    id: orgId,
-    name: organizationName || `${name}'s Organization`,
-    plan: "pro",
-    monthlyTokenLimit: 10_000_000,
-    usedTokensThisMonth: 0,
-    dailyExecutionLimit: 1000,
-    usedExecutionsToday: 0,
-    createdAt: now,
-    updatedAt: now,
-  });
-
-  const userId = `user-${uuidv4().substring(0, 8)}`;
-  const userRole: UserRole = (role as UserRole) || "ORGANIZATION_OWNER";
-  const user = db.createUser({
-    id: userId,
-    email,
-    passwordHash: bcrypt.hashSync(password, 10),
-    name,
-    role: userRole,
-    organizationId: orgId,
-    createdAt: now,
-    updatedAt: now,
-  });
-
-  const payload = {
-    id: user.id,
-    email: user.email,
-    role: user.role,
-    organizationId: user.organizationId,
-  };
-
-  const token = jwt.sign(payload, config.jwtSecret, { expiresIn: config.jwtExpiresIn as any });
-  const refreshToken = jwt.sign(payload, config.jwtRefreshSecret, { expiresIn: config.jwtRefreshExpiresIn as any });
-
-  return res.status(201).json({
-    token,
-    refreshToken,
-    user: {
-      id: user.id,
-      email: user.email,
-      name: user.name,
-      role: user.role,
-      organizationId: user.organizationId,
-      organizationName: org.name,
-    },
-  });
+router.post('/logout',authenticateToken,async(req,res)=>{
+ if(req.user!.sid)await db.update('sessions',req.user!.sid,{revoked:true});
+ return res.json({success:true});
 });
-
-// Password Reset Simulation (with clear documented delivery mechanism)
-router.post("/forgot-password", (req: Request, res: Response) => {
-  const { email } = req.body;
-  if (!email) {
-    return res.status(400).json({ error: "Email is required" });
-  }
-  const user = db.findUserByEmail(email);
-  // Always return consistent success message to prevent user enumeration
-  return res.json({
-    success: true,
-    message: "If an account with that email exists, password reset instructions and a secure token have been dispatched to the registered inbox."
-  });
+router.get('/me',authenticateToken,async(req,res)=>{
+ const current=await db.findUserById(req.user!.id);
+ if(!current)return res.status(401).json({error:'User no longer exists'});
+ const {passwordHash,...user}=current,org=await db.getOrganization(req.user!.organizationId);
+ return res.json({user:{...user,organizationId:req.user!.organizationId,organizationName:org?.name},organization:org});
 });
-
+router.post('/password',authenticateToken,validate(z.object({currentPassword:z.string().min(1).max(128),newPassword:z.string().min(10).max(128).regex(/[A-Z]/).regex(/[a-z]/).regex(/[0-9]/)}).strict()),async(req,res)=>{
+ const user=await db.findUserById(req.user!.id);
+ if(!user||!await bcrypt.compare(req.body.currentPassword,user.passwordHash))return res.status(400).json({error:'Current password is incorrect'});
+ await db.transaction('user:'+user.id,async()=>{
+  await db.updateUser(user.id,{passwordHash:await bcrypt.hash(req.body.newPassword,12)});
+  for(const session of await db.list('sessions',user.organizationId))if(session.userId===user.id)await db.update('sessions',session.id,{revoked:true});
+ });return res.json({success:true,message:'Password changed. Sign in again.'});
+});
+router.post('/forgot-password',(_req,res)=>res.status(503).json({error:'Password recovery delivery is not configured. Contact the workspace owner.'}));
 export default router;

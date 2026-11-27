@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { apiFetch } from "../lib/api";
+import { apiFetch, saveSession } from "../lib/api";
 
 export interface UserProfile {
   id: string;
@@ -37,6 +37,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       try {
         setToken(savedToken);
         setUser(JSON.parse(savedUser));
+        apiFetch("/auth/me").then(data => {setUser(data.user);localStorage.setItem("agentsphere_user",JSON.stringify(data.user));}).catch(() => {});
       } catch (e) {
         localStorage.removeItem("agentsphere_token");
         localStorage.removeItem("agentsphere_user");
@@ -51,6 +52,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       body: JSON.stringify({ email, password }),
     });
 
+    saveSession(data);
     setToken(data.token);
     setUser(data.user);
     localStorage.setItem("agentsphere_token", data.token);
@@ -58,7 +60,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.setItem("agentsphere_active_org", data.user.organizationId);
   };
 
-  const logout = () => {
+  const logout = async () => {
+    try { await apiFetch("/auth/logout", {method:"POST"}); } catch {}
+    sessionStorage.removeItem("agentsphere_refresh_token");
     setToken(null);
     setUser(null);
     localStorage.removeItem("agentsphere_token");

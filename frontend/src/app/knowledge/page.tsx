@@ -14,7 +14,7 @@ import {
   AlertCircle,
   FileCheck,
 } from "lucide-react";
-import { apiFetch } from "../../lib/api";
+import { notify, apiFetch, apiRequest } from "../../lib/api";
 import { useAuth } from "../../context/AuthContext";
 
 export default function KnowledgePage() {
@@ -44,7 +44,7 @@ export default function KnowledgePage() {
     mutationFn: (id: string) => apiFetch(`/documents/${id}/reindex`, { method: "POST" }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["documents"] });
-      alert("Document chunks successfully re-indexed in pgvector store.");
+      notify("Document chunks successfully re-indexed in knowledge index.");
     },
   });
 
@@ -53,6 +53,7 @@ export default function KnowledgePage() {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    if(file.size>4*1024*1024){setUploadError("Maximum file size is 4 MB");e.target.value="";return;}
     setIsUploading(true);
     setUploadError(null);
 
@@ -61,24 +62,13 @@ export default function KnowledgePage() {
 
     const token = localStorage.getItem("agentsphere_token");
     try {
-      const response = await fetch("http://localhost:5000/api/v1/documents/upload", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        body: formData,
-      });
-
-      if (!response.ok) {
-        const err = await response.json();
-        throw new Error(err.message || "Upload failed");
-      }
-
+      await apiRequest('/documents/upload',{method:'POST',body:formData});
       queryClient.invalidateQueries({ queryKey: ["documents"] });
     } catch (err: any) {
       setUploadError(err.message || "Failed to process document");
     } finally {
       setIsUploading(false);
+      e.target.value="";
     }
   };
 
@@ -95,7 +85,7 @@ export default function KnowledgePage() {
       });
       setSearchResults(results);
     } catch (err: any) {
-      alert(`Search failed: ${err.message}`);
+      notify(`Search failed: ${err.message}`);
     } finally {
       setIsSearching(false);
     }
@@ -129,7 +119,7 @@ export default function KnowledgePage() {
         <div className="glass-panel p-6 rounded-2xl flex flex-col justify-between">
           <div>
             <h2 className="text-sm font-bold text-white mb-1">Ingest Documents</h2>
-            <p className="text-xs text-gray-400 mb-4">Supported formats: PDF, TXT, DOCX, CSV, and Markdown (Max 25MB)</p>
+            <p className="text-xs text-gray-400 mb-4">Supported formats: PDF, TXT, DOCX, CSV, and Markdown (Max 4MB)</p>
 
             <label className="border-2 border-dashed border-white/10 hover:border-violet-500/50 rounded-xl p-8 flex flex-col items-center justify-center cursor-pointer bg-obsidian-850 hover:bg-obsidian-800 transition group">
               <UploadCloud className="w-10 h-10 text-gray-500 group-hover:text-violet-400 mb-3 transition" />
@@ -144,7 +134,7 @@ export default function KnowledgePage() {
                 disabled={isUploading}
                 onChange={handleFileUpload}
                 accept=".pdf,.txt,.docx,.csv,.md"
-                className="hidden"
+                className="hidden" aria-label="Field"
               />
             </label>
           </div>
@@ -167,7 +157,7 @@ export default function KnowledgePage() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search policy, rate cards, limits, security..."
-                className="flex-1 bg-obsidian-900 border border-white/10 rounded-lg px-3 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500"
+                className="flex-1 bg-obsidian-900 border border-white/10 rounded-lg px-3 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500" aria-label="Search policy, rate cards, limits, security..."
               />
               <button
                 type="submit"
@@ -186,7 +176,7 @@ export default function KnowledgePage() {
                   <div key={idx} className="p-3 rounded-lg bg-obsidian-850 border border-white/5 text-xs">
                     <div className="flex items-center justify-between mb-1">
                       <span className="font-semibold text-indigo-300">
-                        Match #{idx + 1} • {res.metadata?.filename || "Document"}
+                        Match #{idx + 1} Ã¢â‚¬Â¢ {res.metadata?.filename || "Document"}
                       </span>
                       <span className="font-mono text-[10px] text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded">
                         Score: {(res.similarity_score * 100).toFixed(1)}%

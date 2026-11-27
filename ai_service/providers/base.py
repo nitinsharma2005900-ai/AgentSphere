@@ -1,10 +1,10 @@
 from abc import ABC, abstractmethod
-from typing import AsyncGenerator, Dict, Any, List, Optional
+from typing import AsyncGenerator, Dict, Any, List, Optional, Literal
 from pydantic import BaseModel, Field
 
 class Message(BaseModel):
-    role: str # "user", "assistant", "system"
-    content: str
+    role: Literal["user", "assistant", "system"]
+    content: str = Field(min_length=1, max_length=100000)
 
 class ToolDefinition(BaseModel):
     name: str

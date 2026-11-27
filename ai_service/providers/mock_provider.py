@@ -44,7 +44,7 @@ class DeterministicMockProvider(BaseAIProvider):
 
         # Check for tool calling trigger
         tool_calls: Optional[List[ToolCall]] = None
-        if tools and len(tools) > 0:
+        if tools and len(tools) > 0 and "tool_result" not in last_message:
             lower_msg = last_message.lower()
             if "calculate" in lower_msg or "math" in lower_msg or re.search(r"\d+\s*[\+\-\*\/]\s*\d+", lower_msg):
                 for t in tools:
@@ -83,9 +83,10 @@ class DeterministicMockProvider(BaseAIProvider):
                 f"and resource governance limits."
             )
 
+        content = content[:max_tokens*4]
         completion_tokens = self._estimate_tokens(content)
         total_tokens = prompt_tokens + completion_tokens
-        cost = self._calculate_cost(prompt_tokens, completion_tokens)
+        cost = 0.0  # No provider charge occurs for a development mock.
 
         return GenerationResponse(
             content=content,
@@ -121,7 +122,7 @@ class DeterministicMockProvider(BaseAIProvider):
             "status": "healthy",
             "provider": self.provider_name,
             "model": self.model_name,
-            "latency_ms": 1.2,
+            "verified": False,
             "configured": True,
             "note": "Deterministic secondary mock provider active and operational"
         }
@@ -129,7 +130,7 @@ class DeterministicMockProvider(BaseAIProvider):
     async def get_embeddings(self, texts: List[str]) -> List[List[float]]:
         embeddings = []
         for text in texts:
-            words = text.lower().split()
+            words = re.findall(r"\b\w+\b", text.lower())
             dim = 768
             vector = [0.0] * dim
             for i, word in enumerate(words):

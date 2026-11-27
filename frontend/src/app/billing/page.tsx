@@ -13,7 +13,7 @@ import {
   Shield,
   Sparkles,
 } from "lucide-react";
-import { apiFetch } from "../../lib/api";
+import { apiFetch, apiRequest, notify } from "../../lib/api";
 import { useAuth } from "../../context/AuthContext";
 
 export default function BillingPage() {
@@ -41,13 +41,16 @@ export default function BillingPage() {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["billingUsage"] });
       queryClient.invalidateQueries({ queryKey: ["billingInvoices"] });
-      alert(data.message);
+      notify(data.message);
     },
   });
 
-  const handleDownloadReport = () => {
-    const token = localStorage.getItem("agentsphere_token");
-    window.open("http://localhost:5000/api/v1/billing/export-report?token=" + token, "_blank");
+  const handleDownloadReport = async () => {
+    try {
+      const response=await apiRequest('/billing/export-report');
+      const url=URL.createObjectURL(await response.blob());const a=document.createElement('a');
+      a.href=url;a.download='AgentSphere_Usage_Report.csv';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+    }catch(error){notify(error instanceof Error?error.message:'Download failed');}
   };
 
   const currentPlan = usage?.plan || "pro";

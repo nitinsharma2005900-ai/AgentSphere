@@ -23,6 +23,8 @@ class ParsedDocument(BaseModel):
 
 class DocumentParser:
     def __init__(self, chunk_size: int = 500, chunk_overlap: int = 50):
+        if chunk_size <= 0 or chunk_overlap < 0 or chunk_overlap >= chunk_size:
+            raise ValueError("Chunk size must exceed overlap")
         self.chunk_size = chunk_size
         self.chunk_overlap = chunk_overlap
 
@@ -61,9 +63,8 @@ class DocumentParser:
                     if extracted:
                         pages_text.append(f"[Page {i+1}]\n{extracted}")
                 text = "\n\n".join(pages_text)
-            except Exception as e:
-                # Fallback to UTF-8 extraction if pypdf fails
-                text = file_bytes.decode("utf-8", errors="ignore")
+            except Exception:
+                raise ValueError("Invalid or encrypted PDF document") from None
 
         elif ext == ".docx":
             # Extract basic XML text or fallback
@@ -71,7 +72,10 @@ class DocumentParser:
                 import zipfile
                 import xml.etree.ElementTree as ET
                 with zipfile.ZipFile(io.BytesIO(file_bytes)) as docx_zip:
-                    xml_content = docx_zip.read('word/document.xml')
+                    entry=docx_zip.getinfo('word/document.xml')
+                    if entry.file_size > 10*1024*1024:
+                        raise ValueError('DOCX content exceeds extraction limit')
+                    xml_content = docx_zip.read(entry)
                     tree = ET.fromstring(xml_content)
                     paragraphs = []
                     for node in tree.iter():
@@ -79,7 +83,7 @@ class DocumentParser:
                             paragraphs.append(node.text)
                     text = " ".join(paragraphs)
             except Exception:
-                text = file_bytes.decode("utf-8", errors="ignore")
+                raise ValueError("Invalid DOCX document") from None
 
         return text.strip()
 
@@ -130,6 +134,8 @@ class DocumentParser:
         ext = "." + filename.split(".")[-1].lower()
         extracted_text = self.extract_text(filename, file_bytes)
         
+        if not extracted_text.strip():
+            raise ValueError("Document contains no extractable text; scanned documents require OCR")
         meta = extra_metadata.copy() if extra_metadata else {}
         meta["filename"] = filename
         meta["extension"] = ext

@@ -8,8 +8,8 @@ import { ExecutionEngine } from "../services/executionEngine";
 const router = Router();
 
 // List pending and decided approval requests
-router.get("/", authenticateToken, enforceTenantIsolation, (req: Request, res: Response) => {
-  const approvals = db.getApprovalRequests(req.user!.organizationId);
+router.get("/", authenticateToken, enforceTenantIsolation, async (req: Request, res: Response) => {
+  const approvals = (await db.getApprovalRequests(req.user!.organizationId));
   return res.json(approvals);
 });
 
@@ -21,7 +21,7 @@ router.post(
   requireRoles(["ORGANIZATION_OWNER", "AI_BUILDER"]),
   async (req: Request, res: Response) => {
     const { notes } = req.body;
-    const reqItem = db.getApprovalRequestById(req.user!.organizationId, req.params.id);
+    const reqItem = (await db.getApprovalRequestById(req.user!.organizationId, req.params.id));
     if (!reqItem) return res.status(404).json({ error: "Approval request not found" });
 
     try {
@@ -34,7 +34,7 @@ router.post(
       );
       return res.json({ success: true, execution: resumedExecution });
     } catch (err: any) {
-      return res.status(500).json({ error: "Approval processing failed", message: err.message });
+      return res.status(err.status || 500).json({ error: "Approval processing failed", message: err.message });
     }
   }
 );
@@ -47,7 +47,7 @@ router.post(
   requireRoles(["ORGANIZATION_OWNER", "AI_BUILDER"]),
   async (req: Request, res: Response) => {
     const { notes } = req.body;
-    const reqItem = db.getApprovalRequestById(req.user!.organizationId, req.params.id);
+    const reqItem = (await db.getApprovalRequestById(req.user!.organizationId, req.params.id));
     if (!reqItem) return res.status(404).json({ error: "Approval request not found" });
 
     try {
@@ -60,7 +60,7 @@ router.post(
       );
       return res.json({ success: true, execution: rejectedExecution });
     } catch (err: any) {
-      return res.status(500).json({ error: "Rejection processing failed", message: err.message });
+      return res.status(err.status || 500).json({ error: "Rejection processing failed", message: err.message });
     }
   }
 );

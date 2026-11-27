@@ -12,6 +12,16 @@ out/
 # Environment and secrets
 .env
 .env.local
+*.env
+.env.*
+!.env.example
+.vercel/
+.venv/
+data/
+test-results/
+playwright-report/
+*.tsbuildinfo
+docs/assessment-source.txt
 *.log
 
 # OS

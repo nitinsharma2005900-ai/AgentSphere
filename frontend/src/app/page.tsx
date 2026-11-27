@@ -202,6 +202,8 @@ export default function LandingPage() {
         </div>
       </section>
 
+      <section id="architecture" className="py-16 px-6 lg:px-16 max-w-7xl mx-auto border-t border-white/5"><h2 className="text-2xl font-bold text-white mb-6">Built around your organization</h2><div className="grid md:grid-cols-3 gap-5"><div className="glass-panel p-6 rounded-2xl"><h3 className="text-violet-300 font-semibold">Isolated workspaces</h3><p className="text-sm text-gray-400 mt-3">Scoped sessions and roles protect agents, tools, documents, and execution history.</p></div><div className="glass-panel p-6 rounded-2xl"><h3 className="text-violet-300 font-semibold">Connected knowledge</h3><p className="text-sm text-gray-400 mt-3">Upload documents, retrieve source passages, and attach them to agents for grounded answers.</p></div><div className="glass-panel p-6 rounded-2xl"><h3 className="text-violet-300 font-semibold">Durable execution</h3><p className="text-sm text-gray-400 mt-3">Saved checkpoints and token budgets keep automation reviewable and bounded.</p></div></div></section>
+      <section id="workflows" className="py-16 px-6 lg:px-16 max-w-7xl mx-auto border-t border-white/5"><h2 className="text-2xl font-bold text-white mb-6">From a request to a reviewed result</h2><div className="glass-panel p-6 rounded-2xl flex flex-wrap gap-4 items-center text-sm text-violet-200"><span>Input</span><span aria-hidden="true">?</span><span>Knowledge retrieval</span><span aria-hidden="true">?</span><span>AI agent & tools</span><span aria-hidden="true">?</span><span>Human approval</span><span aria-hidden="true">?</span><span>Saved output</span></div><Link href="/workflows" className="inline-block mt-5 text-violet-300 hover:underline">Open Workflow Builder ?</Link></section>
       {/* Simulated Pricing Section */}
       <section id="pricing" className="py-20 px-6 lg:px-16 max-w-7xl mx-auto border-t border-white/5">
         <div className="text-center mb-16">
@@ -286,7 +288,7 @@ export default function LandingPage() {
       {/* Footer */}
       <footer className="mt-auto py-10 px-6 lg:px-16 border-t border-white/5 bg-obsidian-900 text-xs text-gray-400 flex flex-col md:flex-row items-center justify-between gap-4">
         <div>
-          <span className="font-semibold text-white">AgentSphere</span> – Multi-Tenant AI Agent, Knowledge & Workflow Automation Platform
+          <span className="font-semibold text-white">AgentSphere</span> â€“ Multi-Tenant AI Agent, Knowledge & Workflow Automation Platform
         </div>
         <div className="flex items-center gap-6">
           <Link href="/auth/login" className="hover:text-white transition">Sign In</Link>

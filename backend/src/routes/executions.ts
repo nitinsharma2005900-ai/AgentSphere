@@ -8,14 +8,14 @@ import { ExecutionEngine } from "../services/executionEngine";
 const router = Router();
 
 // List executions for tenant
-router.get("/", authenticateToken, enforceTenantIsolation, (req: Request, res: Response) => {
-  const executions = db.getExecutions(req.user!.organizationId);
+router.get("/", authenticateToken, enforceTenantIsolation, async (req: Request, res: Response) => {
+  const executions = (await db.getExecutions(req.user!.organizationId));
   return res.json(executions);
 });
 
 // Get single execution trace
-router.get("/:id", authenticateToken, enforceTenantIsolation, (req: Request, res: Response) => {
-  const exec = db.getExecutionById(req.user!.organizationId, req.params.id);
+router.get("/:id", authenticateToken, enforceTenantIsolation, async (req: Request, res: Response) => {
+  const exec = (await db.getExecutionById(req.user!.organizationId, req.params.id));
   if (!exec) return res.status(404).json({ error: "Execution record not found" });
   return res.json(exec);
 });
@@ -31,7 +31,7 @@ router.post(
       const updated = await ExecutionEngine.cancelExecution(req.user!.organizationId, req.params.id);
       return res.json(updated);
     } catch (err: any) {
-      return res.status(500).json({ error: "Cancellation failed", message: err.message });
+      return res.status(err.status || 500).json({ error: "Cancellation failed", message: err.message });
     }
   }
 );
@@ -52,7 +52,7 @@ router.post(
       );
       return res.json(updated);
     } catch (err: any) {
-      return res.status(500).json({ error: "Retry failed", message: err.message });
+      return res.status(err.status || 500).json({ error: "Retry failed", message: err.message });
     }
   }
 );

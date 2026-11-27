@@ -8,16 +8,18 @@ import { ExecutionEngine } from "../services/executionEngine";
 import { Agent } from "../types";
 
 const router = Router();
+import { validate, agentSchema } from "../middleware/validation";
+import { AppError } from "../services/errors";
 
 // List agents for tenant
-router.get("/", authenticateToken, enforceTenantIsolation, (req: Request, res: Response) => {
-  const agents = db.getAgents(req.user!.organizationId);
+router.get("/", authenticateToken, enforceTenantIsolation, async (req: Request, res: Response) => {
+  const agents = (await db.getAgents(req.user!.organizationId));
   return res.json(agents);
 });
 
 // Get agent by ID
-router.get("/:id", authenticateToken, enforceTenantIsolation, (req: Request, res: Response) => {
-  const agent = db.getAgentById(req.user!.organizationId, req.params.id);
+router.get("/:id", authenticateToken, enforceTenantIsolation, async (req: Request, res: Response) => {
+  const agent = (await db.getAgentById(req.user!.organizationId, req.params.id));
   if (!agent) {
     return res.status(404).json({ error: "Agent not found in organization" });
   }
@@ -30,7 +32,8 @@ router.post(
   authenticateToken,
   enforceTenantIsolation,
   requireRoles(["ORGANIZATION_OWNER", "AI_BUILDER"]),
-  (req: Request, res: Response) => {
+  async (req: Request, res: Response) => {
+    req.body = agentSchema.parse(req.body);
     const {
       name,
       description,
@@ -62,7 +65,7 @@ router.post(
       avatar: avatar || "bot",
       color: color || "#8B5CF6",
       modelProvider: modelProvider || "gemini",
-      modelName: modelName || "gemini-2.5-flash",
+      modelName: modelName || "gemini-3.8-flash",
       temperature: typeof temperature === "number" ? temperature : 0.7,
       maxTokens: maxTokens || 2048,
       maxSteps: maxSteps || 15,
@@ -77,19 +80,19 @@ router.post(
       updatedAt: now,
     };
 
-    db.createAgent(newAgent);
-    db.logAudit({
-      id: `audit-${uuidv4().substring(0, 8)}`,
-      organizationId: req.user!.organizationId,
-      userId: req.user!.id,
-      userEmail: req.user!.email,
-      action: "AGENT_CREATED",
-      resourceType: "agent",
-      resourceId: newAgent.id,
-      details: { name: newAgent.name },
-      ipAddress: req.ip || "127.0.0.1",
-      timestamp: now,
-    });
+    (await db.createAgent(newAgent));
+    (await db.logAudit({
+            id: `audit-${uuidv4().substring(0, 8)}`,
+            organizationId: req.user!.organizationId,
+            userId: req.user!.id,
+            userEmail: req.user!.email,
+            action: "AGENT_CREATED",
+            resourceType: "agent",
+            resourceId: newAgent.id,
+            details: { name: newAgent.name },
+            ipAddress: req.ip || "127.0.0.1",
+            timestamp: now,
+          }));
 
     return res.status(201).json(newAgent);
   }
@@ -101,13 +104,14 @@ router.put(
   authenticateToken,
   enforceTenantIsolation,
   requireRoles(["ORGANIZATION_OWNER", "AI_BUILDER"]),
-  (req: Request, res: Response) => {
-    const agent = db.getAgentById(req.user!.organizationId, req.params.id);
+  async (req: Request, res: Response) => {
+    const agent = (await db.getAgentById(req.user!.organizationId, req.params.id));
     if (!agent) {
       return res.status(404).json({ error: "Agent not found" });
     }
 
-    const updated = db.updateAgent(req.user!.organizationId, req.params.id, req.body);
+    req.body = agentSchema.partial().parse(req.body);
+    const updated = (await db.updateAgent(req.user!.organizationId, req.params.id, req.body));
     return res.json(updated);
   }
 );
@@ -118,8 +122,8 @@ router.post(
   authenticateToken,
   enforceTenantIsolation,
   requireRoles(["ORGANIZATION_OWNER", "AI_BUILDER"]),
-  (req: Request, res: Response) => {
-    const agent = db.getAgentById(req.user!.organizationId, req.params.id);
+  async (req: Request, res: Response) => {
+    const agent = (await db.getAgentById(req.user!.organizationId, req.params.id));
     if (!agent) {
       return res.status(404).json({ error: "Agent not found" });
     }
@@ -133,7 +137,7 @@ router.post(
       updatedAt: now,
     };
 
-    db.createAgent(duplicated);
+    (await db.createAgent(duplicated));
     return res.status(201).json(duplicated);
   }
 );
@@ -144,8 +148,8 @@ router.delete(
   authenticateToken,
   enforceTenantIsolation,
   requireRoles(["ORGANIZATION_OWNER", "AI_BUILDER"]),
-  (req: Request, res: Response) => {
-    const success = db.deleteAgent(req.user!.organizationId, req.params.id);
+  async (req: Request, res: Response) => {
+    const success = (await db.deleteAgent(req.user!.organizationId, req.params.id));
     if (!success) {
       return res.status(404).json({ error: "Agent not found" });
     }
@@ -169,11 +173,12 @@ router.post(
       const execution = await ExecutionEngine.runAgent(
         req.user!.organizationId,
         req.params.id,
-        prompt
+        prompt,
+        req.get("Idempotency-Key")
       );
       return res.json(execution);
     } catch (err: any) {
-      return res.status(500).json({ error: "Execution Failed", message: err.message });
+      return res.status(err.status || 500).json({ error: "Execution Failed", message: err.status ? err.message : "Execution failed" });
     }
   }
 );

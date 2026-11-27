@@ -17,6 +17,9 @@ export interface User {
 }
 
 export interface Organization {
+  reservedTokens?: number;
+  usageMonth?: string;
+  usageDay?: string;
   id: string;
   name: string;
   plan: "free" | "pro" | "enterprise";
@@ -132,6 +135,13 @@ export interface StepTrace {
 }
 
 export interface ExecutionRecord {
+  idempotencyKey?: string;
+  checkpoint?: { cursor: string; context: Record<string, any>; workflow?: Workflow; agent?: Agent; prompt?: string; agents?: Record<string, Agent>; approvalGranted?: boolean; approvedAgentNodes?:string[]; pendingAgentNode?:string; };
+  reservedTokens?: number;
+  isFallback?: boolean;
+  model?: string;
+  output?: any;
+  retryOf?: string;
   id: string;
   organizationId: string;
   workflowId?: string;
@@ -164,6 +174,10 @@ export interface ApprovalRequest {
 }
 
 export interface DocumentRecord {
+  sourceBase64?: string;
+  contentHash?: string;
+  error?: string;
+  embeddingModel?: string;
   id: string;
   organizationId: string;
   filename: string;

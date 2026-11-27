@@ -11,11 +11,11 @@ router.get(
   "/audit-logs",
   authenticateToken,
   requireRoles(["PLATFORM_ADMINISTRATOR", "AUDITOR", "ORGANIZATION_OWNER"]),
-  (req: Request, res: Response) => {
+  async (req: Request, res: Response) => {
     // If platform admin, can see all; otherwise strictly tenant scoped
-    let logs = db.getAuditLogs(req.user!.organizationId);
+    let logs = (await db.getAuditLogs(req.user!.organizationId));
     if (req.user!.role === "PLATFORM_ADMINISTRATOR") {
-      logs = (db as any).state.auditLogs;
+      logs = (await db.list("audit_logs"));
     }
     return res.json(logs);
   }
@@ -40,15 +40,15 @@ router.get("/provider-health", authenticateToken, async (req: Request, res: Resp
 router.get(
   "/stats",
   authenticateToken,
-  requireRoles(["PLATFORM_ADMINISTRATOR", "ORGANIZATION_OWNER", "AUDITOR"]),
-  (req: Request, res: Response) => {
-    const orgs = db.getAllOrganizations();
-    const currentOrg = db.getOrganization(req.user!.organizationId);
-    const executions = db.getExecutions(req.user!.organizationId);
-    const agents = db.getAgents(req.user!.organizationId);
-    const workflows = db.getWorkflows(req.user!.organizationId);
-    const documents = db.getDocuments(req.user!.organizationId);
-    const pendingApprovals = db.getApprovalRequests(req.user!.organizationId).filter((a) => a.status === "PENDING");
+  
+  async (req: Request, res: Response) => {
+    const orgs = (await db.getAllOrganizations());
+    const currentOrg = (await db.getOrganization(req.user!.organizationId));
+    const executions = (await db.getExecutions(req.user!.organizationId));
+    const agents = (await db.getAgents(req.user!.organizationId));
+    const workflows = (await db.getWorkflows(req.user!.organizationId));
+    const documents = (await db.getDocuments(req.user!.organizationId));
+    const pendingApprovals = (await (await db.getApprovalRequests(req.user!.organizationId)).filter((a) => a.status === "PENDING"));
 
     return res.json({
       organization: currentOrg,
@@ -61,7 +61,7 @@ router.get(
       pendingApprovals: pendingApprovals.length,
       usedTokens: currentOrg?.usedTokensThisMonth || 0,
       monthlyLimit: currentOrg?.monthlyTokenLimit || 10000000,
-      systemOrganizationsCount: orgs.length,
+      systemOrganizationsCount: req.user!.role === "PLATFORM_ADMINISTRATOR" ? orgs.length : 1,
     });
   }
 );

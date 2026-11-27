@@ -4,7 +4,8 @@ module.exports = {
   testMatch: ["**/tests/**/*.test.ts"],
   moduleFileExtensions: ["ts", "js", "json"],
   verbose: true,
-  forceExit: true,
+  setupFiles: ["<rootDir>/tests/setup.ts"],
+  testTimeout: 20000,
   clearMocks: true,
   resetMocks: true,
   restoreMocks: true

@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../../../context/AuthContext";
-import { apiFetch } from "../../../lib/api";
+import { apiFetch, saveSession } from "../../../lib/api";
 import { Bot, Mail, Lock, User, Building2, AlertCircle } from "lucide-react";
 
 export default function SignUpPage() {
@@ -26,6 +26,7 @@ export default function SignUpPage() {
         method: "POST",
         body: JSON.stringify({ name, organizationName, email, password }),
       });
+      saveSession(data);
       localStorage.setItem("agentsphere_token", data.token);
       localStorage.setItem("agentsphere_user", JSON.stringify(data.user));
       localStorage.setItem("agentsphere_active_org", data.user.organizationId);
@@ -70,7 +71,7 @@ export default function SignUpPage() {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Elena Rostova"
-                className="w-full bg-obsidian-900 border border-white/10 rounded-lg pl-9 pr-3 py-2 text-xs text-gray-100 placeholder-gray-500 focus:outline-none focus:border-violet-500"
+                className="w-full bg-obsidian-900 border border-white/10 rounded-lg pl-9 pr-3 py-2 text-xs text-gray-100 placeholder-gray-500 focus:outline-none focus:border-violet-500" aria-label="Your Full Name"
               />
             </div>
           </div>
@@ -85,7 +86,7 @@ export default function SignUpPage() {
                 value={organizationName}
                 onChange={(e) => setOrganizationName(e.target.value)}
                 placeholder="Acme Global AI"
-                className="w-full bg-obsidian-900 border border-white/10 rounded-lg pl-9 pr-3 py-2 text-xs text-gray-100 placeholder-gray-500 focus:outline-none focus:border-violet-500"
+                className="w-full bg-obsidian-900 border border-white/10 rounded-lg pl-9 pr-3 py-2 text-xs text-gray-100 placeholder-gray-500 focus:outline-none focus:border-violet-500" aria-label="Organization Name"
               />
             </div>
           </div>
@@ -100,7 +101,7 @@ export default function SignUpPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="elena@acme.ai"
-                className="w-full bg-obsidian-900 border border-white/10 rounded-lg pl-9 pr-3 py-2 text-xs text-gray-100 placeholder-gray-500 focus:outline-none focus:border-violet-500"
+                className="w-full bg-obsidian-900 border border-white/10 rounded-lg pl-9 pr-3 py-2 text-xs text-gray-100 placeholder-gray-500 focus:outline-none focus:border-violet-500" aria-label="Work Email"
               />
             </div>
           </div>
@@ -115,7 +116,7 @@ export default function SignUpPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Minimum 8 characters"
-                className="w-full bg-obsidian-900 border border-white/10 rounded-lg pl-9 pr-3 py-2 text-xs text-gray-100 placeholder-gray-500 focus:outline-none focus:border-violet-500"
+                className="w-full bg-obsidian-900 border border-white/10 rounded-lg pl-9 pr-3 py-2 text-xs text-gray-100 placeholder-gray-500 focus:outline-none focus:border-violet-500" aria-label="Password"
               />
             </div>
           </div>

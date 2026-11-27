@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Activity,
@@ -15,7 +15,7 @@ import {
   Search,
   AlertTriangle,
 } from "lucide-react";
-import { apiFetch } from "../../lib/api";
+import { notify, apiFetch } from "../../lib/api";
 
 export default function ExecutionsPage() {
   const queryClient = useQueryClient();
@@ -23,10 +23,12 @@ export default function ExecutionsPage() {
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [expandedTraceId, setExpandedTraceId] = useState<string | null>(null);
 
+  useEffect(()=>{setExpandedTraceId(new URLSearchParams(window.location.search).get("id"));},[]);
   // Queries
   const { data: executions, isLoading } = useQuery({
     queryKey: ["allExecutions"],
     queryFn: () => apiFetch("/executions"),
+    refetchInterval:3000,
   });
 
   // Cancel execution mutation
@@ -44,7 +46,7 @@ export default function ExecutionsPage() {
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["allExecutions"] });
-      alert("Step retry initiated successfully.");
+      notify("Step retry initiated successfully.");
     },
   });
 
@@ -78,7 +80,7 @@ export default function ExecutionsPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Filter by execution ID or title..."
-            className="w-full bg-obsidian-900 border border-white/10 rounded-lg px-3 py-1.5 text-white placeholder-gray-500 focus:outline-none"
+            className="w-full bg-obsidian-900 border border-white/10 rounded-lg px-3 py-1.5 text-white placeholder-gray-500 focus:outline-none" aria-label="Filter by execution ID or title..."
           />
         </div>
 
@@ -133,9 +135,9 @@ export default function ExecutionsPage() {
                       </div>
                       <div className="text-[11px] text-gray-400 mt-0.5 flex items-center gap-3">
                         <span>Started: {new Date(exec.startTime).toLocaleTimeString()}</span>
-                        <span>•</span>
+                        <span>â€¢</span>
                         <span>Provider: <strong className="text-gray-300 capitalize">{exec.provider}</strong></span>
-                        <span>•</span>
+                        <span>â€¢</span>
                         <span>Steps: <strong className="text-gray-300">{exec.stepsTimeline?.length || 0}</strong></span>
                       </div>
                     </div>

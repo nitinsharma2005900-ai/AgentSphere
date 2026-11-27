@@ -1,103 +1,26 @@
-import { config } from "../config";
-
-export interface GatewayGenerationResult {
-  content: string;
-  toolCalls?: Array<{ tool_name: string; arguments: Record<string, any> }>;
-  finishReason: string;
-  usage: {
-    prompt_tokens: number;
-    completion_tokens: number;
-    total_tokens: number;
-    estimated_cost_usd: number;
-  };
-  provider: string;
-  model: string;
-  isFallback: boolean;
-}
-
+import { config } from '../config';
+import { z } from 'zod';
+import { AppError } from './errors';
+const resultSchema=z.object({content:z.string(),tool_calls:z.array(z.object({tool_name:z.string(),arguments:z.record(z.unknown())})).nullable().optional(),finish_reason:z.string().optional(),
+ usage:z.object({prompt_tokens:z.number().int().nonnegative(),completion_tokens:z.number().int().nonnegative(),total_tokens:z.number().int().nonnegative(),estimated_cost_usd:z.number().nonnegative()}),provider:z.string(),model:z.string(),is_fallback:z.boolean().optional()});
+export interface GatewayGenerationResult {content:string;toolCalls?:Array<{tool_name:string;arguments:Record<string,any>}>;finishReason:string;usage:{prompt_tokens:number;completion_tokens:number;total_tokens:number;estimated_cost_usd:number};provider:string;model:string;isFallback:boolean;}
 export class AiGatewayClient {
-  public static async generate(params: {
-    messages: Array<{ role: string; content: string }>;
-    provider?: string;
-    systemInstruction?: string;
-    temperature?: number;
-    maxTokens?: number;
-    tools?: any[];
-    responseSchema?: any;
-    tenantId?: string;
-  }): Promise<GatewayGenerationResult> {
-    try {
-      const response = await fetch(`${config.aiServiceUrl}/ai/generate`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          messages: params.messages,
-          provider: params.provider || "gemini",
-          system_instruction: params.systemInstruction,
-          temperature: params.temperature || 0.7,
-          max_tokens: params.maxTokens || 2048,
-          tools: params.tools,
-          response_schema: params.responseSchema,
-          tenant_id: params.tenantId
-        })
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`AI Gateway responded with error ${response.status}: ${errorText}`);
-      }
-
-      const data: any = await response.json();
-      return {
-        content: data.content,
-        toolCalls: data.tool_calls,
-        finishReason: data.finish_reason || "stop",
-        usage: data.usage || {
-          prompt_tokens: 150,
-          completion_tokens: 180,
-          total_tokens: 330,
-          estimated_cost_usd: 0.000085
-        },
-        provider: data.provider || "gemini",
-        model: data.model || "gemini-2.5-flash",
-        isFallback: !!data.is_fallback
-      };
-    } catch (err: any) {
-      console.warn("AI Service unreachable or failed; using resilient embedded provider:", err.message);
-      
-      const lastMsg = params.messages[params.messages.length - 1]?.content || "";
-      const tokens = Math.max(20, Math.floor(lastMsg.length / 4) + 60);
-      const cost = Number(((tokens / 1000000) * 0.15).toFixed(6));
-
-      return {
-        content: `[AgentSphere Resilient Provider] Processed query: "${lastMsg.substring(0, 100)}"\n\nAnalysis: Completed processing under organization context. Parameters and system instructions verified.`,
-        finishReason: "stop",
-        usage: {
-          prompt_tokens: Math.floor(tokens * 0.4),
-          completion_tokens: Math.ceil(tokens * 0.6),
-          total_tokens: tokens,
-          estimated_cost_usd: cost
-        },
-        provider: "resilient_mock",
-        model: "agentsphere-mock-v1",
-        isFallback: true
-      };
-    }
-  }
-
-  public static async getHealth(): Promise<any> {
-    try {
-      const resp = await fetch(`${config.aiServiceUrl}/health/`);
-      if (resp.ok) {
-        return await resp.json();
-      }
-      return { status: "degraded", error: `HTTP ${resp.status}` };
-    } catch (err: any) {
-      return {
-        status: "mock_mode",
-        active_provider: "mock",
-        note: "FastAPI gateway running in standalone or fallback mock mode"
-      };
-    }
-  }
+ static headers(tenantId?:string):Record<string,string> {return {'Content-Type':'application/json','X-Service-Key':config.serviceSecret,...(tenantId?{'X-Tenant-Id':tenantId}:{})};}
+ static async request(path:string,body?:unknown,tenantId?:string,method='POST',signal?:AbortSignal):Promise<any>{
+  try {
+   const response=await fetch(`${config.aiServiceUrl}${path}`,{method,headers:this.headers(tenantId),...(body===undefined?{}:{body:JSON.stringify(body)}),signal:signal||AbortSignal.timeout(45000)});
+   if(!response.ok)throw new AppError(response.status===400||response.status===422?400:503,response.status<500?'The AI service rejected the input. Check document format and prompt content.':'AI service unavailable. Check provider configuration and retry.');
+   return await response.json();
+  }catch(error){if(error instanceof AppError)throw error;throw new AppError(503,'AI gateway unavailable or timed out. Check service health and retry.');}
+ }
+ static async generate(params:{messages:Array<{role:string;content:string}>;provider?:string;model?:string;systemInstruction?:string;temperature?:number;maxTokens?:number;tools?:any[];responseSchema?:any;tenantId?:string;signal?:AbortSignal}):Promise<GatewayGenerationResult>{
+  if(params.provider==='mock'&&!config.allowMock)throw new AppError(400,'Mock provider is disabled. Configure a real Gemini API key.');
+  const raw=await this.request('/ai/generate',{messages:params.messages,provider:params.provider||'gemini',model:params.model,system_instruction:params.systemInstruction,temperature:params.temperature??0.7,max_tokens:params.maxTokens??2048,tools:params.tools,response_schema:params.responseSchema,tenant_id:params.tenantId},params.tenantId,'POST',params.signal);
+  const parsed=resultSchema.safeParse(raw);
+  if(!parsed.success)throw new AppError(502,'AI provider returned malformed output. Execution stopped safely.');
+  const data=parsed.data;
+  if(data.provider==='mock'&&!config.allowMock)throw new AppError(503,'The real model provider is unavailable; mock fallback is disabled.');
+  return {content:data.content,toolCalls:data.tool_calls||undefined,finishReason:data.finish_reason||'stop',usage:data.usage,provider:data.provider,model:data.model,isFallback:!!data.is_fallback};
+ }
+ static async getHealth(){try{return await this.request('/health/',undefined,undefined,'GET',AbortSignal.timeout(8000));}catch{return {status:'unavailable',active_provider:'unavailable',providers:{gemini:{status:'unavailable',configured:false}}};}}
 }

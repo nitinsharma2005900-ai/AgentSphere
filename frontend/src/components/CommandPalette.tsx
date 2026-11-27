@@ -134,7 +134,7 @@ export function CommandPalette({ isOpen, onClose }: { isOpen: boolean; onClose: 
             placeholder="Type a command or jump to section..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="w-full bg-transparent text-sm text-gray-100 placeholder-gray-500 focus:outline-none"
+            className="w-full bg-transparent text-sm text-gray-100 placeholder-gray-500 focus:outline-none" aria-label="Type a command or jump to section..."
           />
           <button
             onClick={onClose}

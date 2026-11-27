@@ -14,11 +14,24 @@ import {
   Code,
   ShieldAlert,
 } from "lucide-react";
-import { apiFetch } from "../../lib/api";
+import { notify, apiFetch } from "../../lib/api";
+import { Dialog } from "../../components/Feedback";
 
 export default function ToolsPage() {
   const queryClient = useQueryClient();
 
+  const [configuring,setConfiguring]=useState<any>(null);
+  const [toolName,setToolName]=useState(''),[toolDescription,setToolDescription]=useState(''),[toolEndpoint,setToolEndpoint]=useState(''),[toolSchema,setToolSchema]=useState('{"type":"object","properties":{}}'),[credential,setCredential]=useState('');
+  const [saving,setSaving]=useState(false);
+  const configure=(tool:any)=>{setConfiguring(tool||{});setToolName(tool?.name||'');setToolDescription(tool?.description||'');setToolEndpoint(tool?.endpointUrl||'');setToolSchema(JSON.stringify(tool?.parameters||{type:'object',properties:{}},null,2));setCredential('');};
+  const saveTool=async(e:React.FormEvent)=>{e.preventDefault();setSaving(true);try{
+    const data:any={description:toolDescription,parameters:JSON.parse(toolSchema)};
+    if(toolEndpoint)data.endpointUrl=toolEndpoint;
+    if(!configuring.id){data.name=toolName;data.category='api';}
+    const tool=await apiFetch(configuring.id?`/tools/${configuring.id}`:'/tools',{method:configuring.id?'PUT':'POST',body:JSON.stringify(data)});
+    if(credential)await apiFetch(`/tools/${tool.id}/credential`,{method:'PUT',body:JSON.stringify({value:credential})});
+    await queryClient.invalidateQueries({queryKey:['tools']});setConfiguring(null);setCredential('');notify('Tool configuration saved');
+   }catch(error){notify(error instanceof Error?error.message:'Save failed');}finally{setSaving(false);}};
   const [testingTool, setTestingTool] = useState<any>(null);
   const [testArgsJson, setTestArgsJson] = useState('{"expression": "4500 * 1.18"}');
   const [testResult, setTestResult] = useState<any>(null);
@@ -46,7 +59,7 @@ export default function ToolsPage() {
     try {
       parsedArgs = JSON.parse(testArgsJson);
     } catch {
-      alert("Invalid JSON format for arguments.");
+      notify("Invalid JSON format for arguments.");
       setIsTesting(false);
       return;
     }
@@ -87,6 +100,8 @@ export default function ToolsPage() {
         </p>
       </div>
 
+      <button onClick={()=>configure(null)} className="glow-btn rounded-lg px-4 py-2 text-xs text-white">Register HTTPS tool</button>
+      {configuring&&<Dialog label="Configure tool" onClose={()=>setConfiguring(null)} className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm overflow-y-auto"><form onSubmit={saveTool} className="glass-panel-elevated p-6 rounded-2xl w-full max-w-xl space-y-3 text-xs"><h2 className="text-base font-semibold">{configuring.id?'Configure tool':'Register HTTPS tool'}</h2><label className="block">Tool name<input aria-label="Tool name" disabled={!!configuring.id} required pattern="[a-z][a-z0-9_]{2,60}" value={toolName} onChange={e=>setToolName(e.target.value)} className="block w-full rounded-lg p-2 bg-obsidian-900 border border-white/10"/></label><label className="block">Description<input aria-label="Tool description" required value={toolDescription} onChange={e=>setToolDescription(e.target.value)} className="block w-full rounded-lg p-2 bg-obsidian-900 border border-white/10"/></label><label className="block">HTTPS endpoint<input aria-label="Tool endpoint" type="url" required={!configuring.isSystemTool} value={toolEndpoint} onChange={e=>setToolEndpoint(e.target.value)} className="block w-full rounded-lg p-2 bg-obsidian-900 border border-white/10"/></label><label className="block">Parameter schema (JSON)<textarea aria-label="Tool parameter schema" rows={5} value={toolSchema} onChange={e=>setToolSchema(e.target.value)} className="block w-full rounded-lg p-2 bg-obsidian-900 border border-white/10 font-mono"/></label><label className="block">Optional bearer credential<input aria-label="Tool credential" type="password" autoComplete="off" value={credential} onChange={e=>setCredential(e.target.value)} className="block w-full rounded-lg p-2 bg-obsidian-900 border border-white/10"/></label><p className="text-gray-500">The endpoint must be on the workspace administrator?s HTTPS host allowlist. Credentials are encrypted and never returned by the API.</p><div className="flex gap-3"><button type="button" onClick={()=>setConfiguring(null)} className="p-2">Cancel</button><button disabled={saving} className="glow-btn rounded-lg p-2">Save tool</button></div></form></Dialog>}
       {/* Tool Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         {isLoading ? (
@@ -138,6 +153,7 @@ export default function ToolsPage() {
               {/* Action */}
               <div className="pt-3 border-t border-white/5 flex items-center justify-between">
                 <span className="text-[10px] text-gray-500 font-mono">Timeout: {tool.timeoutMs}ms</span>
+                <button onClick={()=>configure(tool)} className="text-xs text-violet-300 p-2 border border-white/10 rounded-lg">Configure</button>
                 <button
                   onClick={() => openTestDialog(tool)}
                   className="px-3 py-1.5 rounded-lg bg-emerald-600/20 hover:bg-emerald-600 text-emerald-300 hover:text-white border border-emerald-500/30 text-xs font-semibold flex items-center gap-1.5 transition"
@@ -153,7 +169,7 @@ export default function ToolsPage() {
 
       {/* Interactive Tool Test Modal */}
       {testingTool && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm">
+        <Dialog className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm" onClose={()=>setTestingTool(null)} label="Test tool">
           <div className="w-full max-w-lg glass-panel-elevated p-6 rounded-2xl space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-white/5">
               <h3 className="text-base font-bold text-white flex items-center gap-2">
@@ -176,7 +192,7 @@ export default function ToolsPage() {
                 rows={4}
                 value={testArgsJson}
                 onChange={(e) => setTestArgsJson(e.target.value)}
-                className="w-full bg-obsidian-900 border border-white/10 rounded-lg p-2.5 text-white font-mono text-xs focus:outline-none focus:border-emerald-500"
+                className="w-full bg-obsidian-900 border border-white/10 rounded-lg p-2.5 text-white font-mono text-xs focus:outline-none focus:border-emerald-500" aria-label="JSON Arguments Payload"
               />
             </div>
 
@@ -209,7 +225,7 @@ export default function ToolsPage() {
               </div>
             )}
           </div>
-        </div>
+        </Dialog>
       )}
     </div>
   );
