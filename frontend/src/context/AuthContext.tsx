@@ -1,6 +1,8 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from "react";
+import {useRouter} from "next/navigation";
+import {useQueryClient} from "@tanstack/react-query";
 import { apiFetch, saveSession } from "../lib/api";
 
 export interface UserProfile {
@@ -25,6 +27,8 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType>({} as AuthContextType);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const router=useRouter(),queryClient=useQueryClient();
+  useEffect(()=>{const expired=()=>{queryClient.clear();setUser(null);setToken(null);router.replace("/auth/login");};window.addEventListener("agentsphere:session-expired",expired);return()=>window.removeEventListener("agentsphere:session-expired",expired);},[queryClient,router]);
   const [user, setUser] = useState<UserProfile | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -52,6 +56,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       body: JSON.stringify({ email, password }),
     });
 
+    queryClient.clear();
     saveSession(data);
     setToken(data.token);
     setUser(data.user);
@@ -68,7 +73,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.removeItem("agentsphere_token");
     localStorage.removeItem("agentsphere_user");
     localStorage.removeItem("agentsphere_active_org");
-    window.location.href = "/auth/login";
+    queryClient.clear();
+    router.replace("/auth/login");
   };
 
   const switchOrganization = async (targetOrganizationId: string) => {

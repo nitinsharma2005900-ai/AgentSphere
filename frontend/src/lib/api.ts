@@ -16,7 +16,7 @@ export async function apiRequest(endpoint:string,options:RequestInit={},retried=
  if(response.status===401&&typeof window!=='undefined'&&!endpoint.startsWith('/auth/')){
   if(!retried&&await refresh())return apiRequest(endpoint,options,true);
   localStorage.removeItem('agentsphere_token');localStorage.removeItem('agentsphere_user');sessionStorage.removeItem('agentsphere_refresh_token');
-  window.location.assign('/auth/login');
+  window.dispatchEvent(new CustomEvent('agentsphere:session-expired'));
  }
  if(!response.ok){const text=await response.text();let detail;try{const data=JSON.parse(text);detail=data.message||data.error;}catch{}throw new Error(detail||`Request failed (HTTP ${response.status})`);}
  return response;
